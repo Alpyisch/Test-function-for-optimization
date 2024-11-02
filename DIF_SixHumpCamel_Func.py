@@ -1,3 +1,19 @@
+import time
+
+# Başlangıç zamanı
+start_time = time.time()
+
+# Kodunuzu buraya yazın
+# Örneğin:
+for i in range(1000000):
+    pass
+
+# Bitiş zamanı
+end_time = time.time()
+
+# Çalışma süresi
+print("Çalışma süresi:", end_time - start_time, "saniye")
+
 import numpy as np
 
 # Six-Hump Camel fonksiyonu
@@ -6,7 +22,7 @@ def six_hump_camel(x):
     return (4 - 2.1 * x1**2 + (x1**4) / 3) * x1**2 + x1 * x2 + (-4 + 4 * x2**2) * x2**2
 
 # Diferansiyel evrim algoritması
-def differential_evolution(func, bounds, pop_size=20, max_iter=100, F=0.5, CR=0.7):
+def differential_evolution(func, bounds, pop_size=50, max_iter=100, F=0.5, CR=0.7):
     # Popülasyonu oluştur
     population = np.random.rand(pop_size, len(bounds)) * (bounds[:, 1] - bounds[:, 0]) + bounds[:, 0]
     best_solution = None
