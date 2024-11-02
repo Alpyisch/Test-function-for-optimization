@@ -13,14 +13,14 @@ end_time = time.time()
 
 # Çalışma süresi
 print("Çalışma süresi:", end_time - start_time, "saniye")
-
 import numpy as np
 
 class Beale_GA:
     def __init__(self, lower_bound, upper_bound, population_size, variable_count, crossover_rate, mutation_rate):
+        # Popülasyon boyutunu 50 ile sınırla
+        self.population_size = min(population_size, 50)
         self.lower_bound = lower_bound
         self.upper_bound = upper_bound
-        self.population_size = population_size
         self.variable_count = variable_count
         self.crossover_rate = crossover_rate
         self.mutation_rate = mutation_rate
