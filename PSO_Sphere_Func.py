@@ -1,3 +1,19 @@
+import time
+
+# Başlangıç zamanı
+start_time = time.time()
+
+# Kodunuzu buraya yazın
+# Örneğin:
+for i in range(1000000):
+    pass
+
+# Bitiş zamanı
+end_time = time.time()
+
+# Çalışma süresi
+print("Çalışma süresi:", end_time - start_time, "saniye")
+
 import numpy as np
 
 class Sphere_PSO:

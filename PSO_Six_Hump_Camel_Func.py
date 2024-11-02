@@ -1,3 +1,19 @@
+import time
+
+# Başlangıç zamanı
+start_time = time.time()
+
+# Kodunuzu buraya yazın
+# Örneğin:
+for i in range(1000000):
+    pass
+
+# Bitiş zamanı
+end_time = time.time()
+
+# Çalışma süresi
+print("Çalışma süresi:", end_time - start_time, "saniye")
+
 import numpy as np
 
 class Six_Hump_Camel:
@@ -62,7 +78,7 @@ class Six_Hump_Camel:
         return self.gbest
 
 # Six Hump Camel fonksiyonu için PSO'yu çalıştırma
-pso_object = Six_Hump_Camel(-2, 2, 1550, 2, 2, 2)  # 2 boyutlu Six Hump Camel fonksiyonu
+pso_object = Six_Hump_Camel(-2, 2, 50, 2, 2, 2)  # 2 boyutlu Six Hump Camel fonksiyonu
 best_values = pso_object.train()
 
 print("Best x1 value: ", best_values[0])
