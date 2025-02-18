@@ -178,25 +178,25 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
     bounds = {
-        'sphere': (-10, 10),
+        'sphere': (-5.12, 5.12),
         'ackley': (-32.768, 32.768),
         'three_hump_camel': (-5, 5),
-        'six_hump_camel': (-3, 3),
+        'six_hump_camel': ((-3, 3),(-2, 2)),
         'dixon_price': (-10, 10),
         'rosenbrock': (-5, 10),
         'beale': (-4.5, 4.5),
-        'branin': (-5, 15),
+        'branin': ((-5, 10),(0, 15)),
         'colville': (-10, 10),
         'forrester': (0, 1),
         'goldstein_price': (-2, 2),
         'hartmann_3d': (0, 1),
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1),
-        'perm': (-4, 4),
+        'perm': (-4, 4), ##bu kodun değerleri aynı olmak şartı ile eksi ile artı aralığında değiştirilebilir.(-d,d)
         'powell': (-4, 5),
         'shekel': (0, 10),
         'styblinski_tang': (-5, 5),
-        'bukin': (-15, 15),
+        'bukin': ((-15, 15),(-3, 3)),
         'cross_in_tray': (-10, 10),
         'drop_wave': (-5.12, 5.12),
         'eggholder': (-512, 512),
@@ -210,21 +210,20 @@ if __name__ == '__main__':
         'schaffer_n2': (-100, 100),
         'schaffer_n4': (-100, 100),
         'schwefel': (-500, 500),
-        'shubert': (-5.12, 5.12),
+        'shubert': (-10, 10),
         'michalewicz': (0, np.pi),
         'easom': (-100, 100),
         'booth': (-10, 10),
         'matyas': (-10, 10),
-        'zakharov': (-10, 10),
-        'bukin_n5': (-15, 15),
-        'schwefel_226': (-500, 500),
-        'sinc': (-10, 10),
-        'ackley2': (-32.768, 32.768),
-        'sum_squares': (-10, 10),
-        'step': (-10, 10),
-        'alpine': (-10, 10),
-        'bukin_n4': (-15, 15),
-        'cosine_mixture': (-10, 10)
+        'zakharov': (-5, 10),
+        'Bohachevsky': (-100, 100),
+        'Perm_0': (-10, 10), ##bu kodun değerleri aynı olmak şartı ile eksi ile artı aralığında değiştirilebilir.(-d,d)
+        'Rotated_Hyper-Ellipsoid': (-65.536, 65.536),
+        'Sum of Different Powers': (-1, 1), 
+        'McCormick': ((-1.5, 4),(-3,4)),
+        'Trid': (-10, 10), ## bu kodun değerleri değiştirilecek
+        'Power Sum': (0, 10), #bu kodun değerleri 0 ile herhangi bir eksi olmayan değerler arasında değiştirilebilir.(0, d)
+        'cDe Jong': (-65.536, 65.536)
     }
     
     if args.function not in bounds:
