@@ -1,4 +1,3 @@
-# Description: This file contains the implementation of 47 optimization functions.
 import numpy as np
 class OptimizationFunctions:
     def sphere_function(self, x):
@@ -454,7 +453,6 @@ class OptimizationFunctions:
         sum_sq = np.sum(x**2)
         sum_cos = np.sum(np.cos(c * x))
         return -a * np.exp(-b * np.sqrt(sum_sq / d)) - np.exp(sum_cos / d) + a + np.e
-
     def sum_squares_function(self, x):
         """Sum Squares Function"""
         return np.sum(x**2)
@@ -475,4 +473,87 @@ class OptimizationFunctions:
     def cosine_mixture_function(self, x):
         """Cosine Mixture Function"""
         return np.sum(np.cos(x) + 0.5 * x)
-    
+    def cdes_function(self, x):
+        """Cdes Function"""
+        return np.sum((x - 1)**2)
+
+    def power_sum_function(self, x):
+        """Power Sum Function"""
+        d = len(x)
+        return np.sum([(i+1) * (x[i]**(i+1)) for i in range(d)])
+
+    def pathological_function(self, x):
+        """Pathological Function"""
+        d = len(x)
+        return np.sum([0.5 + (np.sin(np.sqrt(100 * x[i]**2 + x[i+1]**2))**2 - 0.5) / (1 + 0.001 * (x[i]**2 - 2*x[i]*x[i+1] + x[i+1]**2)**2) for i in range(d-1)])
+    def perm_0_d_beta_function(self, x, beta=0.5):
+        """Perm 0, d, beta Function"""
+        d = len(x)
+        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+
+    def perm_d_beta_function(self, x, beta=0.5):
+        """Perm d, beta Function"""
+        d = len(x)
+        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+    def bohacevsky_function(self, x):
+        """Bohacevsky Function"""
+        x1, x2 = x[0], x[1]
+        return x1**2 + 2*x2**2 - 0.3*np.cos(3*np.pi*x1) - 0.4*np.cos(4*np.pi*x2) + 0.7
+
+    def perm0_function(self, x, beta=0.5):
+        """Perm0 Function"""
+        d = len(x)
+        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+
+    def rotade_hyper_elipsiod_function(self, x):
+        """Rotated Hyper-Ellipsoid Function"""
+        d = len(x)
+        return np.sum([np.sum(x[:i+1]**2) for i in range(d)])
+
+    def zettle_function(self, x):
+        """Zettle Function"""
+        x1, x2 = x[0], x[1]
+        return x1**2 + x2**2 - 0.5*np.cos(2*np.pi*x1) - 0.5*np.cos(2*np.pi*x2) + 0.5
+
+    def mccormick_function(self, x):
+        """McCormick Function"""
+        x1, x2 = x[0], x[1]
+        return np.sin(x1 + x2) + (x1 - x2)**2 - 1.5*x1 + 2.5*x2 + 1
+
+    def schaffer_f6_function(self, x):
+        """Schaffer F6 Function"""
+        x1, x2 = x[0], x[1]
+        return 0.5 + (np.sin(np.sqrt(x1**2 + x2**2))**2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2))**2
+    def cde_jong_function(self, x):
+        """De Jong Function"""
+        return np.sum(x**2)
+    def de_jong_function(self, x):
+        """De Jong Function"""
+        return np.sum(x**2)
+
+    def trid_function(self, x):
+        """Trid Function"""
+        d = len(x)
+        return np.sum((x - 1)**2) - np.sum(x[1:] * x[:-1])
+    def rotated_hyper_ellipsoid_function(self, x):
+        """Rotated Hyper-Ellipsoid Function"""
+        d = len(x)
+        return np.sum([np.sum(x[:i+1]**2) for i in range(d)])
+    def bohacevsky_function(self, x):
+        """Bohacevsky Function"""
+        x1, x2 = x[0], x[1]
+        return x1**2 + 2*x2**2 - 0.3*np.cos(3*np.pi*x1) - 0.4*np.cos(4*np.pi*x2) + 0.7
+
+    def de_jong_n5_function(self, x):
+        """De Jong N.5 Function"""
+        A = np.array([
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32]
+        ])
+        return 0.002 + np.sum(1 / (np.arange(1, 26) + np.sum((x - A)**6, axis=1)))
+    def sum_of_different_powers_function(self, x):
+        """Sum of Different Powers Function"""
+        return np.sum(np.abs(x)**(np.arange(1, len(x) + 1)))
