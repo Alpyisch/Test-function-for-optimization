@@ -164,6 +164,7 @@ def parse_arguments():
     parser.add_argument('--limit', type=int, default=100, help='Limit for scout bee phase')
     parser.add_argument('--max-cycles', type=int, default=1000, help='Maximum cycles')
     parser.add_argument('--tolerance', type=float, default=1e-6, help='Convergence tolerance')
+    parser.add_argument('--trials', type=int, default=1, help='Number of independent trials to run')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -234,6 +235,16 @@ if __name__ == '__main__':
     # Initialize optimization functions
     opt_functions = OptimizationFunctions()
     objective_func = getattr(opt_functions, f"{args.function}_function")
+    
+    # Run simulation if multiple trials requested
+    if args.trials > 1:
+        statistics = run_simulation(
+            optimizer=optimizer,
+            objective_func=objective_func,
+            num_trials=args.trials,
+            max_cycles=args.max_cycles,
+            tolerance=args.tolerance
+        )
     
     # Run optimization
     start_time = time.time()
