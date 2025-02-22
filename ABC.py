@@ -156,6 +156,55 @@ class ABCOptimizer:
             'diversity_history': self.diversity_history
         }
 
+def run_simulation(optimizer, objective_func, num_trials, max_cycles, tolerance):
+    all_results = []
+    best_fitness_overall = np.inf
+    best_position_overall = None
+    total_start_time = time.time()
+    
+    for trial in range(num_trials):
+        # Reset optimizer for new trial
+        optimizer.food_sources = optimizer._initialize_food_sources()
+        optimizer.fitness_scores = np.full(optimizer.employed_bees, np.inf)
+        optimizer.trial_counts = np.zeros(optimizer.employed_bees)
+        optimizer.best_solution = None
+        optimizer.best_fitness = np.inf
+        optimizer.convergence_history = []
+        optimizer.diversity_history = []
+        
+        # Run optimization
+        result = optimizer.optimize(
+            objective_func=objective_func,
+            max_cycles=max_cycles,
+            tolerance=tolerance
+        )
+        
+        all_results.append(result)
+        
+        # Update overall best if necessary
+        if result['best_fitness'] < best_fitness_overall:
+            best_fitness_overall = result['best_fitness']
+            best_position_overall = result['best_position'].copy()
+    
+    # Calculate statistics
+    fitness_values = [r['best_fitness'] for r in all_results]
+    cycles_values = [r['cycles'] for r in all_results]
+    
+    statistics = {
+        'best_fitness_overall': best_fitness_overall,
+        'best_position_overall': best_position_overall,
+        'mean_fitness': np.mean(fitness_values),
+        'std_fitness': np.std(fitness_values),
+        'min_fitness': np.min(fitness_values),
+        'max_fitness': np.max(fitness_values),
+        'mean_cycles': np.mean(cycles_values),
+        'std_cycles': np.std(cycles_values),
+        'total_time': time.time() - total_start_time,
+        'num_trials': num_trials
+    }
+    
+    return statistics
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Artificial Bee Colony Optimization')
     parser.add_argument('--function', type=str, required=True, help='Function to optimize')
