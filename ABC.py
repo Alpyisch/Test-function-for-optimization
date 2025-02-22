@@ -261,5 +261,7 @@ if __name__ == '__main__':
     print(f"Best Position: {result['best_position']}")
     print(f"Best Fitness: {result['best_fitness']:.10f}")
     print(f"Cycles: {result['cycles']}")
-    print(f"Execution Time: {end_time - start_time:.2f} seconds")
+    print(f"Execution Time: {end_time - start_time:.6f} seconds")  # Time in milliseconds
+    if args.trials > 1:
+        print(f"Total Time: {statistics['total_time']:.2f} seconds")
     print(f"Final Colony Diversity: {result['diversity_history'][-1]:.6f}")
