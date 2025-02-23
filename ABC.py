@@ -233,7 +233,7 @@ if __name__ == '__main__':
         'hartmann_3d': (0, 1),
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1),
-        'perm': (-4, 4), ##bu kodun değerleri aynı olmak şartı ile eksi ile artı aralığında değiştirilebilir.(-d,d)
+        'perm': (-2, 2), 
         'powell': (-4, 5),
         'shekel': (0, 10),
         'styblinski_tang': (-5, 5),
@@ -257,14 +257,14 @@ if __name__ == '__main__':
         'booth': (-10, 10),
         'matyas': (-10, 10),
         'zakharov': (-5, 10),
-        'bohachevsky': (-100, 100), ## after this spot addings are made by yasin
-        'perm_0': (-10, 10), ##bu kodun değerleri aynı olmak şartı ile eksi ile artı aralığında değiştirilebilir.(-d,d)
-        'rotated_hyper-ellipsoid': (-65.536, 65.536),
-        'sum of different powers': (-1, 1), 
-        'mccormick': ((-1.5, 4),(-3,4)),
-        'trid': (-10, 10), ## bu kodun değerleri değiştirilecek
-        'power sum': (0, 10), #bu kodun değerleri 0 ile herhangi bir eksi olmayan değerler arasında değiştirilebilir.(0, d)
-        'cde jong': (-65.536, 65.536)
+        'Bohachevsky': (-100, 100),
+        'Perm_0': (-2, 2), 
+        'Rotated_Hyper-Ellipsoid': (-65.536, 65.536),
+        'Sum of Different Powers': (-1, 1), 
+        'McCormick': ((-1.5, 4),(-3,4)),
+        'Trid': (-2, 2), 
+        'Power Sum': (0, 2), 
+        'cDe Jong': (-65.536, 65.536)
     }
     
     if args.function not in bounds:
