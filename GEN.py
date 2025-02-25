@@ -171,7 +171,8 @@ if __name__ == '__main__':
         'mccormick': ((-1.5, 4),(-3,4)),
         'trid': (-2, 2), 
         'power_sum': (0, 2), 
-        'cde_jong': (-65.536, 65.536)
+        'cde_jong': (-65.536, 65.536),
+        'sum_squares': (-10, 10)
     }
     
     if args.function not in bounds:
