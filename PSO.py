@@ -111,7 +111,6 @@ def parse_arguments():
 if __name__ == '__main__':
     args = parse_arguments()
     bounds = {
-        'sphere': (-5.12, 5.12),
         'ackley': (-32.768, 32.768),
         'three_hump_camel': (-5, 5),
         'six_hump_camel': ((-3, 3),(-2, 2)),
@@ -149,14 +148,15 @@ if __name__ == '__main__':
         'booth': (-10, 10),
         'matyas': (-10, 10),
         'zakharov': (-5, 10),
-        'Bohachevsky': (-100, 100),
-        'Perm_0': (-2, 2), 
-        'Rotated_Hyper-Ellipsoid': (-65.536, 65.536),
-        'Sum of Different Powers': (-1, 1), 
-        'McCormick': ((-1.5, 4),(-3,4)),
-        'Trid': (-2, 2), 
-        'Power Sum': (0, 2), 
-        'cDe Jong': (-65.536, 65.536)
+        'bohachevsky': (-100, 100),
+        'perm_0': (-2, 2), 
+        'rotated_hyper_ellipsoid': (-65.536, 65.536),
+         'sphere': (-5.12, 5.12),
+        'sum_of_different_powers': (-1, 1), 
+        'mccormick': ((-1.5, 4),(-3,4)),
+        'trid': (-2, 2), 
+        'power_sum': (0, 2), 
+        'cde_jong': (-65.536, 65.536)
     }
     dimension_requirements = {
         'sphere': 2,
