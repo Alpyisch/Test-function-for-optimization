@@ -100,7 +100,7 @@ class PSOOptimizer:
 def parse_arguments():
     parser = argparse.ArgumentParser(description='Particle Swarm Optimization')
     parser.add_argument('--function', type=str, required=True, help='Function to optimize')
-    parser.add_argument('--particles', type=int, default=30, help='Number of particles')
+    parser.add_argument('--particles', type=int, default=50, help='Number of particles')
     parser.add_argument('--dimension', type=int, default=2, help='Problem dimension')
     parser.add_argument('--c1', type=float, default=2.0, help='Cognitive parameter')
     parser.add_argument('--c2', type=float, default=2.0, help='Social parameter')
