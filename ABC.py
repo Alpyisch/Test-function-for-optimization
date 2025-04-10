@@ -78,6 +78,7 @@ class ABCOptimizer:
         return np.mean(distances)
     
     def optimize(self, objective_func, max_cycles=1000, tolerance=1e-6):
+        print("\nOptimization Progress:")
         for cycle in range(max_cycles):
             # Employed Bees Phase
             for i in range(self.employed_bees):
@@ -144,6 +145,14 @@ class ABCOptimizer:
             # Track metrics
             self.convergence_history.append(self.best_fitness)
             self.diversity_history.append(self._calculate_swarm_diversity())
+            
+            # Print current cycle results
+            print(f"\nCycle {cycle + 1}:")
+            print("Current Best Position:")
+            for i, pos in enumerate(self.best_solution):
+                print(f"x{i+1}: {pos:.10f}")
+            print(f"Current Best Fitness: {self.best_fitness:.10f}")
+            print(f"Current Colony Diversity: {self.diversity_history[-1]:.6f}")
             
             if self.best_fitness <= tolerance:
                 break
@@ -311,7 +320,7 @@ if __name__ == '__main__':
     print(f"Best Position: {result['best_position']}")
     print(f"Best Fitness: {result['best_fitness']:.10f}")
     print(f"Cycles: {result['cycles']}")
-    print(f"Execution Time: {end_time - start_time:.6f} seconds")  # Time in milliseconds
+    print(f"Execution Time: {end_time - start_time:.6f} seconds")
     if args.trials > 1:
         print(f"Total Time: {statistics['total_time']:.2f} seconds")
     print(f"Final Colony Diversity: {result['diversity_history'][-1]:.6f}")
