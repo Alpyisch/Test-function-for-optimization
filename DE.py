@@ -34,10 +34,8 @@ class DEOptimizer:
     
     def _initialize_population(self):
         population = np.zeros((self.population_size, self.dimension))
-        for d in range(self.dimension):
-            segment_size = (self.upper_bound - self.lower_bound) / self.population_size
-            for i in range(self.population_size):
-                population[i, d] = self.lower_bound + (i + np.random.random()) * segment_size
+        for i in range(self.population_size):
+            population[i] = np.random.uniform(self.lower_bound, self.upper_bound, self.dimension)
         return population
     
     def _mutation_rand_1(self, target_idx):
@@ -117,12 +115,15 @@ class DEOptimizer:
         distances = np.linalg.norm(self.population - mean_position, axis=1)
         return np.mean(distances)
     
-    def optimize(self, objective_func, max_generations=1000, tolerance=1e-6):
+    def optimize(self, objective_func, max_generations=1000, tolerance=1e-6, verbose=True):
         # Initial evaluation
         self.fitness_scores = np.array([objective_func(ind) for ind in self.population])
         best_idx = np.argmin(self.fitness_scores)
         self.best_solution = self.population[best_idx].copy()
         self.best_fitness = self.fitness_scores[best_idx]
+        
+        if verbose:
+            print("\nOptimization Progress:")
         
         for generation in range(max_generations):
             for i in range(self.population_size):
@@ -149,7 +150,15 @@ class DEOptimizer:
             self.convergence_history.append(self.best_fitness)
             self.diversity_history.append(self._calculate_population_diversity())
             
+            # Print current generation results if verbose
+            if verbose and (generation % 100 == 0 or generation == max_generations - 1):
+                print(f"\nGeneration {generation + 1}:")
+                print(f"Current Best Fitness: {self.best_fitness:.10f}")
+                print(f"Current Population Diversity: {self.diversity_history[-1]:.6f}")
+            
             if self.best_fitness <= tolerance:
+                if verbose:
+                    print(f"\nConvergence achieved at generation {generation + 1}")
                 break
         
         return {
@@ -160,39 +169,98 @@ class DEOptimizer:
             'diversity_history': self.diversity_history
         }
 
+def run_simulation(objective_func, bounds, dimension, population_size, F, CR, strategy, max_generations, tolerance, num_trials):
+    all_results = []
+    best_fitness_overall = np.inf
+    best_position_overall = None
+    total_start_time = time.time()
+    
+    for trial in range(num_trials):
+        print(f"\n--- Trial {trial + 1}/{num_trials} ---")
+        
+        # Create a fresh optimizer for each trial
+        optimizer = DEOptimizer(
+            lower_bound=bounds[0],
+            upper_bound=bounds[1],
+            population_size=population_size,
+            dimension=dimension,
+            F=F,
+            CR=CR,
+            strategy=strategy
+        )
+        
+        # Run optimization with reduced verbosity for all but the first trial
+        verbose = (trial == 0)
+        result = optimizer.optimize(
+            objective_func=objective_func,
+            max_generations=max_generations,
+            tolerance=tolerance,
+            verbose=verbose
+        )
+        
+        all_results.append(result)
+        
+        # Update overall best if necessary
+        if result['best_fitness'] < best_fitness_overall:
+            best_fitness_overall = result['best_fitness']
+            best_position_overall = result['best_position'].copy()
+        
+        print(f"Trial {trial + 1} completed:")
+        print(f"Best Fitness: {result['best_fitness']:.10f}")
+        print(f"Generations: {result['generations']}")
+    
+    # Calculate statistics
+    fitness_values = [r['best_fitness'] for r in all_results]
+    generations_values = [r['generations'] for r in all_results]
+    
+    statistics = {
+        'best_fitness_overall': best_fitness_overall,
+        'best_position_overall': best_position_overall,
+        'mean_fitness': np.mean(fitness_values),
+        'std_fitness': np.std(fitness_values),
+        'min_fitness': np.min(fitness_values),
+        'max_fitness': np.max(fitness_values),
+        'mean_generations': np.mean(generations_values),
+        'std_generations': np.std(generations_values),
+        'total_time': time.time() - total_start_time,
+        'num_trials': num_trials
+    }
+    
+    return statistics
+
 def parse_arguments():
-    parser = argparse.ArgumentParser(description='Differential Evolution Optimization')
+    parser = argparse.ArgumentParser(description='Differential Evolution Algorithm Parameters')
     parser.add_argument('--function', type=str, required=True, help='Function to optimize')
     parser.add_argument('--population', type=int, default=50, help='Population size')
     parser.add_argument('--dimension', type=int, default=2, help='Problem dimension')
     parser.add_argument('--F', type=float, default=0.5, help='Scaling factor')
     parser.add_argument('--CR', type=float, default=0.7, help='Crossover rate')
-    parser.add_argument('--strategy', type=str, default='DE/rand/1/bin', 
-                       choices=['DE/rand/1/bin', 'DE/best/1/bin', 'DE/current-to-best/1/bin',
-                               'DE/best/2/bin', 'DE/rand/2/bin'],
-                       help='DE strategy')
+    parser.add_argument('--strategy', type=str, default='DE/rand/1/bin',
+                      choices=['DE/rand/1/bin', 'DE/best/1/bin', 'DE/current-to-best/1/bin',
+                              'DE/best/2/bin', 'DE/rand/2/bin'],
+                      help='DE strategy to use')
     parser.add_argument('--max-generations', type=int, default=1000, help='Maximum generations')
     parser.add_argument('--tolerance', type=float, default=1e-6, help='Convergence tolerance')
+    parser.add_argument('--trials', type=int, default=1, help='Number of independent trials to run')
     return parser.parse_args()
 
 if __name__ == '__main__':
     args = parse_arguments()
     bounds = {
-        'sphere': (-10, 10),
         'ackley': (-32.768, 32.768),
         'three_hump_camel': (-5, 5),
         'six_hump_camel': (-3, 3),
         'dixon_price': (-10, 10),
         'rosenbrock': (-5, 10),
         'beale': (-4.5, 4.5),
-        'branin': (-5, 15),
+        'branin': (-5, 10),
         'colville': (-10, 10),
         'forrester': (0, 1),
         'goldstein_price': (-2, 2),
         'hartmann_3d': (0, 1),
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1),
-        'perm': (-4, 4),
+        'perm': (-2, 2), 
         'powell': (-4, 5),
         'shekel': (0, 10),
         'styblinski_tang': (-5, 5),
@@ -210,57 +278,72 @@ if __name__ == '__main__':
         'schaffer_n2': (-100, 100),
         'schaffer_n4': (-100, 100),
         'schwefel': (-500, 500),
-        'shubert': (-5.12, 5.12),
+        'shubert': (-10, 10),
         'michalewicz': (0, np.pi),
         'easom': (-100, 100),
         'booth': (-10, 10),
         'matyas': (-10, 10),
-        'zakharov': (-10, 10),
-        'bukin_n5': (-15, 15),
-        'schwefel_226': (-500, 500),
-        'sinc': (-10, 10),
-        'ackley2': (-32.768, 32.768),
+        'zakharov': (-5, 10),
+        'bohachevsky': (-100, 100),
+        'perm_0': (-2, 2), 
+        'rotated_hyper_ellipsoid': (-65.536, 65.536),
+        'sphere': (-5.12, 5.12),
+        'sum_of_different_powers': (-1, 1), 
+        'mccormick': (-1.5, 4),
+        'trid': (-2, 2), 
+        'power_sum': (0, 2), 
+        'cde_jong': (-65.536, 65.536),
         'sum_squares': (-10, 10),
-        'step': (-10, 10),
+        'ackley2': (-32.768, 32.768),
         'alpine': (-10, 10),
         'bukin_n4': (-15, 15),
-        'cosine_mixture': (-10, 10)
+        'bukin_n5': (-15, 15),
+        'cosine_mixture': (-1, 1)
     }
     
     if args.function not in bounds:
         raise ValueError(f"Function '{args.function}' is not implemented or bounds are not defined.")
     
-    lower_bound, upper_bound = bounds[args.function]
-    
-    # Initialize optimizer
-    optimizer = DEOptimizer(
-        lower_bound=lower_bound,
-        upper_bound=upper_bound,
-        population_size=args.population,
-        dimension=args.dimension,
-        F=args.F,
-        CR=args.CR,
-        strategy=args.strategy
-    )
-    
-    # Initialize optimization functions
+    # Get optimization function
     opt_functions = OptimizationFunctions()
     objective_func = getattr(opt_functions, f"{args.function}_function")
-    
-    # Run optimization
-    start_time = time.time()
-    result = optimizer.optimize(
-        objective_func=objective_func,
-        max_generations=args.max_generations,
-        tolerance=args.tolerance
-    )
-    end_time = time.time()
-    
-    # Print results
-    print("\nOptimization Results:")
-    print(f"Function: {args.function}")
-    print(f"Best Position: {result['best_position']}")
-    print(f"Best Fitness: {result['best_fitness']:.10f}")
-    print(f"Generations: {result['generations']}")
-    print(f"Execution Time: {end_time - start_time:.2f} seconds")
-    print(f"Final Population Diversity: {result['diversity_history'][-1]:.6f}")
+
+    if args.trials > 1:
+        results = run_simulation(
+            objective_func=objective_func,
+            bounds=bounds[args.function],
+            dimension=args.dimension,
+            population_size=args.population,
+            F=args.F,
+            CR=args.CR,
+            strategy=args.strategy,
+            max_generations=args.max_generations,
+            tolerance=args.tolerance,
+            num_trials=args.trials
+        )
+    else:
+        # Create and run optimizer
+        optimizer = DEOptimizer(
+            lower_bound=bounds[args.function][0],
+            upper_bound=bounds[args.function][1],
+            population_size=args.population,
+            dimension=args.dimension,
+            F=args.F,
+            CR=args.CR,
+            strategy=args.strategy
+        )
+        
+        results = optimizer.optimize(
+            objective_func=objective_func,
+            max_generations=args.max_generations,
+            tolerance=args.tolerance
+        )
+        
+        # Print results
+        print("\nOptimization Results:")
+        print(f"Function: {args.function}")
+        print(f"Best Position: {results['best_position']}")
+        print(f"Best Fitness: {results['best_fitness']:.10f}")
+        print(f"Generations: {results['generations']}")
+        print(f"Execution Time: {time.time() - start_time:.2f} seconds")
+        print(f"Final Population Diversity: {results['diversity_history'][-1]:.6f}")

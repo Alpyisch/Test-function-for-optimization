@@ -1,4 +1,3 @@
-# Description: This file contains the implementation of 47 optimization functions.
 import numpy as np
 class OptimizationFunctions:
     def sphere_function(self, x):
@@ -230,53 +229,53 @@ class OptimizationFunctions:
 
     def optimize(self, func_name, max_iterations=1000, tolerance=1e-6):
         functions = {
-            'sphere': self.sphere_function,
-            'ackley': self.ackley_function,
-            'three_hump_camel': self.three_hump_camel_function,
-            'six_hump_camel': self.six_hump_camel_function,
-            'dixon_price': self.dixon_price_function,
-            'rosenbrock': self.rosenbrock_function,
-            'beale': self.beale_function,
-            'branin': self.branin_function,
-            'colville': self.colville_function,
-            'forrester': self.forrester_function,
-            'goldstein_price': self.goldstein_price_function,
-            'hartmann_3d': self.hartmann_3d_function,
-            'hartmann_4d': self.hartmann_4d_function,
-            'hartmann_6d': self.hartmann_6d_function,
-            'perm': self.perm_function,
-            'powell': self.powell_function,
-            'shekel': self.shekel_function,
-            'styblinski_tang': self.styblinski_tang_function,
-            'bukin': self.bukin_n6_function,
-            'cross_in_tray': self.cross_in_tray_function,
-            'drop_wave': self.drop_wave_function,
-            'eggholder': self.eggholder_function,
-            'gramacy_lee': self.gramacy_lee_function,
-            'griewank': self.griewank_function,
-            'holder_table': self.holder_table_function,
-            'langermann': self.langermann_function,
-            'levy': self.levy_function,
-            'levy_n13': self.levy_n13_function,
-            'rastrigin': self.rastrigin_function,
-            'schaffer_n2': self.schaffer_n2_function,
-            'schaffer_n4': self.schaffer_n4_function,
-            'schwefel': self.schwefel_function,
-            'shubert': self.shubert_function,
-            'michalewicz': self.michalewicz_function,
-            'easom': self.easom_function,
-            'booth': self.booth_function,
-            'matyas': self.matyas_function,
-            'zakharov': self.zakharov_function,
-            'bukin_n5': self.bukin_n5_function,
-            'schwefel_226': self.schwefel_226_function,
-            'sinc': self.sinc_function,
-            'ackley2': self.ackley2_function,
-            'sum_squares': self.sum_squares_function,
-            'step': self.step_function,
-            'alpine': self.alpine_function,
-            'bukin_n4': self.bukin_n4_function,
-            'cosine_mixture': self.cosine_mixture_function
+        'ackley': self.ackley_function,
+        'beale': self.beale_function,
+        'bohacevsky': self.bohacevsky_function,
+        'booth': self.booth_function,
+        'branin': self.branin_function,
+        'bukin_n6': self.bukin_n6_function,
+        'colville': self.colville_function,
+        'cross_in_tray': self.cross_in_tray_function,
+        'de_jong_n5': self.de_jong_n5_function,
+        'dixon_price': self.dixon_price_function,
+        'drop_wave': self.drop_wave_function,
+        'easom': self.easom_function,
+        'eggholder': self.eggholder_function,
+        'forrester': self.forrester_function,
+        'goldstein_price': self.goldstein_price_function,
+        'gramacy_lee': self.gramacy_lee_function,
+        'griewank': self.griewank_function,
+        'hartmann_3d': self.hartmann_3d_function,
+        'hartmann_4d': self.hartmann_4d_function,
+        'hartmann_6d': self.hartmann_6d_function,
+        'holder_table': self.holder_table_function,
+        'langermann': self.langermann_function,
+        'levy': self.levy_function,
+        'levy_n13': self.levy_n13_function,
+        'matyas': self.matyas_function,
+        'mccormick': self.mccormick_function,
+        'michalewicz': self.michalewicz_function,
+        'perm_0_d_beta': self.perm_0_d_beta_function,
+        'perm_d_beta': self.perm_d_beta_function,
+        'powell': self.powell_function,
+        'power_sum': self.power_sum_function,
+        'rastrigin': self.rastrigin_function,
+        'rosenbrock': self.rosenbrock_function,
+        'rotated_hyper_ellipsoid': self.rotated_hyper_ellipsoid_function,
+        'schaffer_n2': self.schaffer_n2_function,
+        'schaffer_n4': self.schaffer_n4_function,
+        'schwefel': self.schwefel_function,
+        'shekel': self.shekel_function,
+        'shubert': self.shubert_function,
+        'six_hump_camel': self.six_hump_camel_function,
+        'sphere': self.sphere_function,
+        'styblinski_tang': self.styblinski_tang_function,
+        'sum_of_different_powers': self.sum_of_different_powers_function,
+        'sum_squares': self.sum_squares_function,
+        'three_hump_camel': self.three_hump_camel_function,
+        'trid': self.trid_function,
+        'zakharov': self.zakharov_function
         }
 
         if func_name not in functions:
@@ -454,7 +453,6 @@ class OptimizationFunctions:
         sum_sq = np.sum(x**2)
         sum_cos = np.sum(np.cos(c * x))
         return -a * np.exp(-b * np.sqrt(sum_sq / d)) - np.exp(sum_cos / d) + a + np.e
-
     def sum_squares_function(self, x):
         """Sum Squares Function"""
         return np.sum(x**2)
@@ -475,4 +473,87 @@ class OptimizationFunctions:
     def cosine_mixture_function(self, x):
         """Cosine Mixture Function"""
         return np.sum(np.cos(x) + 0.5 * x)
-    
+    def cdes_function(self, x):
+        """Cdes Function"""
+        return np.sum((x - 1)**2)
+
+    def power_sum_function(self, x):
+        """Power Sum Function"""
+        d = len(x)
+        return np.sum([(i+1) * (x[i]**(i+1)) for i in range(d)])
+
+    def pathological_function(self, x):
+        """Pathological Function"""
+        d = len(x)
+        return np.sum([0.5 + (np.sin(np.sqrt(100 * x[i]**2 + x[i+1]**2))**2 - 0.5) / (1 + 0.001 * (x[i]**2 - 2*x[i]*x[i+1] + x[i+1]**2)**2) for i in range(d-1)])
+    def perm_0_d_beta_function(self, x, beta=0.5):
+        """Perm 0, d, beta Function"""
+        d = len(x)
+        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+
+    def perm_d_beta_function(self, x, beta=0.5):
+        """Perm d, beta Function"""
+        d = len(x)
+        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+    def bohacevsky_function(self, x):
+        """Bohacevsky Function"""
+        x1, x2 = x[0], x[1]
+        return x1**2 + 2*x2**2 - 0.3*np.cos(3*np.pi*x1) - 0.4*np.cos(4*np.pi*x2) + 0.7
+
+    def perm0_function(self, x, beta=0.5):
+        """Perm0 Function"""
+        d = len(x)
+        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+
+    def rotade_hyper_elipsiod_function(self, x):
+        """Rotated Hyper-Ellipsoid Function"""
+        d = len(x)
+        return np.sum([np.sum(x[:i+1]**2) for i in range(d)])
+
+    def zettle_function(self, x):
+        """Zettle Function"""
+        x1, x2 = x[0], x[1]
+        return x1**2 + x2**2 - 0.5*np.cos(2*np.pi*x1) - 0.5*np.cos(2*np.pi*x2) + 0.5
+
+    def mccormick_function(self, x):
+        """McCormick Function"""
+        x1, x2 = x[0], x[1]
+        return np.sin(x1 + x2) + (x1 - x2)**2 - 1.5*x1 + 2.5*x2 + 1
+
+    def schaffer_f6_function(self, x):
+        """Schaffer F6 Function"""
+        x1, x2 = x[0], x[1]
+        return 0.5 + (np.sin(np.sqrt(x1**2 + x2**2))**2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2))**2
+    def cde_jong_function(self, x):
+        """De Jong Function"""
+        return np.sum(x**2)
+    def de_jong_function(self, x):
+        """De Jong Function"""
+        return np.sum(x**2)
+
+    def trid_function(self, x):
+        """Trid Function"""
+        d = len(x)
+        return np.sum((x - 1)**2) - np.sum(x[1:] * x[:-1])
+    def rotated_hyper_ellipsoid_function(self, x):
+        """Rotated Hyper-Ellipsoid Function"""
+        d = len(x)
+        return np.sum([np.sum(x[:i+1]**2) for i in range(d)])
+    def bohacevsky_function(self, x):
+        """Bohacevsky Function"""
+        x1, x2 = x[0], x[1]
+        return x1**2 + 2*x2**2 - 0.3*np.cos(3*np.pi*x1) - 0.4*np.cos(4*np.pi*x2) + 0.7
+
+    def de_jong_n5_function(self, x):
+        """De Jong N.5 Function"""
+        A = np.array([
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32],
+            [-32, -16, 0, 16, 32]
+        ])
+        return 0.002 + np.sum(1 / (np.arange(1, 26) + np.sum((x - A)**6, axis=1)))
+    def sum_of_different_powers_function(self, x):
+        """Sum of Different Powers Function"""
+        return np.sum(np.abs(x)**(np.arange(1, len(x) + 1)))
