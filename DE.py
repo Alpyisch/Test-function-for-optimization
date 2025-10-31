@@ -308,42 +308,45 @@ if __name__ == '__main__':
     opt_functions = OptimizationFunctions()
     objective_func = getattr(opt_functions, f"{args.function}_function")
 
-    if args.trials > 1:
-        results = run_simulation(
-            objective_func=objective_func,
-            bounds=bounds[args.function],
-            dimension=args.dimension,
-            population_size=args.population,
-            F=args.F,
-            CR=args.CR,
-            strategy=args.strategy,
-            max_generations=args.max_generations,
-            tolerance=args.tolerance,
-            num_trials=args.trials
-        )
-    else:
-        # Create and run optimizer
-        optimizer = DEOptimizer(
-            lower_bound=bounds[args.function][0],
-            upper_bound=bounds[args.function][1],
-            population_size=args.population,
-            dimension=args.dimension,
-            F=args.F,
-            CR=args.CR,
-            strategy=args.strategy
-        )
-        
-        results = optimizer.optimize(
-            objective_func=objective_func,
-            max_generations=args.max_generations,
-            tolerance=args.tolerance
-        )
-        
-        # Print results
-        print("\nOptimization Results:")
-        print(f"Function: {args.function}")
-        print(f"Best Position: {results['best_position']}")
-        print(f"Best Fitness: {results['best_fitness']:.10f}")
-        print(f"Generations: {results['generations']}")
-        print(f"Execution Time: {time.time() - start_time:.2f} seconds")
-        print(f"Final Population Diversity: {results['diversity_history'][-1]:.6f}")
+if args.trials > 1:
+    results = run_simulation(
+        objective_func=objective_func,
+        bounds=bounds[args.function],
+        dimension=args.dimension,
+        population_size=args.population,
+        F=args.F,
+        CR=args.CR,
+        strategy=args.strategy,
+        max_generations=args.max_generations,
+        tolerance=args.tolerance,
+        num_trials=args.trials
+    )
+else:
+    # Create and run optimizer
+    optimizer = DEOptimizer(
+        lower_bound=bounds[args.function][0],
+        upper_bound=bounds[args.function][1],
+        population_size=args.population,
+        dimension=args.dimension,
+        F=args.F,
+        CR=args.CR,
+        strategy=args.strategy
+    )
+    
+    # Optimize
+    start_time = time.time()  # Burada start_time tanımlanıyor
+    results = optimizer.optimize(
+        objective_func=objective_func,
+        max_generations=args.max_generations,
+        tolerance=args.tolerance
+    )
+    end_time = time.time()  # Optimize işlemi tamamlandıktan sonra end_time tanımlanıyor
+    
+    # Print results
+    print("\nOptimization Results:")
+    print(f"Function: {args.function}")
+    print(f"Best Position: {results['best_position']}")
+    print(f"Best Fitness: {results['best_fitness']:.10f}")
+    print(f"Generations: {results['generations']}")
+    print(f"Execution Time: {end_time - start_time:.2f} seconds")  # start_time ve end_time kullanılıyor
+    print(f"Final Population Diversity: {results['diversity_history'][-1]:.6f}")

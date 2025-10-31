@@ -25,36 +25,36 @@ def run_algorithm(algorithm, function_name, dimension, population_size, max_iter
         cmd = [
             "python", "ABC.py",
             "--function", function_name,
-            "--colony-size", str(population_size),
+            "--colony-size", "75",  # ABC için önerilen değer
             "--dimension", str(dimension),
-            "--max-cycles", str(max_iterations),
+            "--max-cycles", "1500",  # ABC için önerilen değer
             "--trials", str(trials)
         ]
     elif algorithm == "PSO":
         cmd = [
             "python", "PSO.py",
             "--function", function_name,
-            "--particles", str(population_size),
+            "--particles", "40",  # PSO için önerilen değer
             "--dimension", str(dimension),
-            "--max-iterations", str(max_iterations),
+            "--max-iterations", "1500",  # PSO için önerilen değer
             "--trials", str(trials)
         ]
     elif algorithm == "DE":
         cmd = [
             "python", "DE.py",
             "--function", function_name,
-            "--population", str(population_size),
+            "--population", "75",  # DE için önerilen değer
             "--dimension", str(dimension),
-            "--max-generations", str(max_iterations),
+            "--max-generations", "1500",  # DE için önerilen değer
             "--trials", str(trials)
         ]
     elif algorithm == "GEN":
         cmd = [
             "python", "GEN.py",
             "--function", function_name,
-            "--population-size", str(population_size),
+            "--population-size", "75",  # GEN için önerilen değer
             "--dimension", str(dimension),
-            "--max-generations", str(max_iterations),
+            "--max-generations", "1500",  # GEN için önerilen değer
             "--trials", str(trials)
         ]
     else:
@@ -78,8 +78,7 @@ def run_algorithm(algorithm, function_name, dimension, population_size, max_iter
         return {
             "algorithm": algorithm,
             "function": function_name,
-            "success": False,
-            "error": stderr
+            "success": False
         }
     
     # Çıktıyı analiz et
@@ -114,7 +113,7 @@ def run_algorithm(algorithm, function_name, dimension, population_size, max_iter
 
 def compare_algorithms(functions, dimension=2, population_size=50, max_iterations=1000, trials=1):
     """
-    Tüm algoritmaları belirtilen fonksiyonlar üzerinde çalıştırır ve sonuçları karşılaştırır.
+    Tüm algoritmaları belirtilen fonksiyonlar üzerinde çalıştırır ve sonuçları döndürür.
     
     Args:
         functions: Test edilecek fonksiyon adları listesi
@@ -124,7 +123,7 @@ def compare_algorithms(functions, dimension=2, population_size=50, max_iteration
         trials: Deneme sayısı
         
     Returns:
-        pandas.DataFrame: Karşılaştırma sonuçları
+        list: Her fonksiyon için sonuç dictionary'leri
     """
     algorithms = ["ABC", "PSO", "DE", "GEN"]
     results = []
@@ -143,15 +142,7 @@ def compare_algorithms(functions, dimension=2, population_size=50, max_iteration
             )
             results.append(result)
     
-    # Sonuçları DataFrame'e dönüştür
-    df = pd.DataFrame(results)
-    
-    # Sonuçları Excel'e kaydet
-    output_file = f"algorithm_comparison_results.xlsx"
-    df.to_excel(output_file, index=False)
-    print(f"\nSonuçlar {output_file} dosyasına kaydedildi.")
-    
-    return df
+    return results
 
 def get_available_functions():
     """
@@ -226,24 +217,37 @@ if __name__ == "__main__":
     }
     
     # Test edilecek fonksiyonları seç
-    # Basitlik için sadece 2 boyutlu fonksiyonları test edelim
-    test_functions = [func for func in all_functions if func in dimension_requirements and dimension_requirements[func] == 2]
+    test_functions = []
+    for func in all_functions:
+        if func in dimension_requirements:
+            test_functions.append((func, dimension_requirements[func]))
     
-    # Eğer çok fazla fonksiyon varsa, sadece ilk 10'unu al
-    if len(test_functions) > 10:
-        test_functions = test_functions[:10]
+    print(f"Test edilecek fonksiyonlar: {[f[0] for f in test_functions]}")
     
-    print(f"Test edilecek fonksiyonlar: {test_functions}")
+    # Tüm sonuçları toplamak için liste
+    all_results = []
     
-    # Algoritmaları karşılaştır
-    results = compare_algorithms(
-        functions=test_functions,
-        dimension=2,
-        population_size=50,
-        max_iterations=1000,
-        trials=1  # Hızlı sonuç için tek deneme
-    )
+    # Her fonksiyon için uygun boyutta çalıştır
+    for func_name, dim in test_functions:
+        print(f"\nFonksiyon: {func_name} (Boyut: {dim})")
+        results = compare_algorithms(
+            functions=[func_name],
+            dimension=dim,
+            population_size=75,  # Varsayılan değer (algoritmalar kendi değerlerini kullanacak)
+            max_iterations=1500,  # Varsayılan değer (algoritmalar kendi değerlerini kullanacak)
+            trials=1  # Hızlı sonuç için tek deneme
+        )
+        # Sonuçları ana listeye ekle
+        all_results.extend(results)
+    
+    # Tüm sonuçları DataFrame'e dönüştür
+    final_results = pd.DataFrame(all_results)
+    
+    # Sonuçları Excel'e kaydet (tek seferde, tüm veriler birlikte)
+    output_file = "all_functions_comparison_results.xlsx"
+    final_results.to_excel(output_file, index=False)
+    print(f"\nTüm sonuçlar {output_file} dosyasına kaydedildi.")
     
     # Sonuçları göster
     print("\nKarşılaştırma Sonuçları:")
-    print(results) 
+    print(final_results)
