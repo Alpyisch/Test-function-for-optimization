@@ -275,7 +275,8 @@ class OptimizationFunctions:
         'sum_squares': self.sum_squares_function,
         'three_hump_camel': self.three_hump_camel_function,
         'trid': self.trid_function,
-        'zakharov': self.zakharov_function
+        'zakharov': self.zakharov_function,
+        'sinc': self.sinc_function
         }
 
         if func_name not in functions:
