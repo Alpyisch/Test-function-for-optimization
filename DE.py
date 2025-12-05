@@ -242,6 +242,8 @@ def parse_arguments():
     parser.add_argument('--max-generations', type=int, default=1000, help='Maximum generations')
     parser.add_argument('--tolerance', type=float, default=1e-6, help='Convergence tolerance')
     parser.add_argument('--trials', type=int, default=1, help='Number of independent trials to run')
+    parser.add_argument('--lower-bound', type=float, help='Custom lower bound')
+    parser.add_argument('--upper-bound', type=float, help='Custom upper bound')
     return parser.parse_args()
 
 if __name__ == '__main__':
@@ -300,10 +302,15 @@ if __name__ == '__main__':
         'bukin_n5': (-15, 15),
         'cosine_mixture': (-1, 1)
     }
-    
-    if args.function not in bounds:
-        raise ValueError(f"Function '{args.function}' is not implemented or bounds are not defined.")
-    
+    if args.lower_bound is not None and args.upper_bound is not None:
+        lower_bound = args.lower_bound
+        upper_bound = args.upper_bound
+    else:
+        if args.function not in bounds:
+            raise ValueError(f"Function '{args.function}' is not implemented or bounds are not defined.")
+    lower_bound, upper_bound = bounds[args.function]
+
+
     # Get optimization function
     opt_functions = OptimizationFunctions()
     objective_func = getattr(opt_functions, f"{args.function}_function")

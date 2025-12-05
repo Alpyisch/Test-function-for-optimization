@@ -214,6 +214,13 @@ if __name__ == '__main__':
         'bukin_n5': (-15, 15),
         'cosine_mixture': (-1, 1)
     }
+    if args.lower_bound is not None and args.upper_bound is not None:
+        lower_bound = args.lower_bound
+        upper_bound = args.upper_bound
+    else:
+        if args.function not in bounds:
+            raise ValueError(f"Function '{args.function}' is not implemented or bounds are not defined.")
+    lower_bound, upper_bound = bounds[args.function]    
 
     # Get optimization function
     opt_functions = OptimizationFunctions()
