@@ -204,7 +204,7 @@ if __name__ == '__main__':
         'powell': (-4, 5),
         'shekel': (0, 10),
         'styblinski_tang': (-5, 5),
-        'bukin': (-15, 15),
+        'bukin': (-15, -5),
         'cross_in_tray': (-10, 10),
         'drop_wave': (-5.12, 5.12),
         'eggholder': (-512, 512),
@@ -232,14 +232,10 @@ if __name__ == '__main__':
         'mccormick': (-1.5, 4),
         'trid': (-2, 2), 
         'power_sum': (0, 2), 
-        'cde_jong': (-65.536, 65.536),
+        'de_jong': (-65.536, 65.536),
         'sum_squares': (-10, 10),
-        'ackley2': (-32.768, 32.768),
-        'alpine': (-10, 10),
-        'bukin_n4': (-15, 15),
-        'bukin_n5': (-15, 15),
-        'cosine_mixture': (-1, 1)
     }
+    
     dimension_requirements = {
         'sphere': 2,
         'ackley': 2,
@@ -279,15 +275,7 @@ if __name__ == '__main__':
         'booth': 2,
         'matyas': 2,
         'zakharov': 2,
-        'bukin_n5': 2,
-        'schwefel_226': 2,
-        'sinc': 2,
-        'ackley2': 2,
         'sum_squares': 2,
-        'step': 2,
-        'alpine': 2,
-        'bukin_n4': 2,
-        'cosine_mixture': 2
     }
     
     if args.lower_bound is not None and args.upper_bound is not None:
