@@ -111,15 +111,17 @@ class PSOOptimizer:
             'diversity_history': self.diversity_history
         }
 
-def run_simulation(optimizer, objective_func, num_trials, max_iterations, tolerance):
+def run_simulation(optimizer, objective_func, function_name, num_trials, max_iterations, tolerance, dimension):
     all_results = []
     best_fitness_overall = np.inf
     best_position_overall = None
     total_start_time = time.time()
     
+    print("\n" + "="*80)
+    print(f"Running {num_trials} trials for {function_name} function (Dimension: {dimension})")
+    print("="*80)
+    
     for trial in range(num_trials):
-        print(f"\n--- Trial {trial + 1}/{num_trials} ---")
-        
         # Reset optimizer for new trial
         optimizer.particles = optimizer._initialize_particles()
         optimizer.velocities = optimizer._initialize_velocities()
@@ -130,13 +132,12 @@ def run_simulation(optimizer, objective_func, num_trials, max_iterations, tolera
         optimizer.convergence_history = []
         optimizer.diversity_history = []
         
-        # Run optimization with reduced verbosity for all but the first trial
-        verbose = (trial == 0)
+        # Run optimization without verbose output for cleaner results
         result = optimizer.optimize(
             objective_func=objective_func,
             max_iterations=max_iterations,
             tolerance=tolerance,
-            verbose=verbose
+            verbose=False
         )
         
         all_results.append(result)
@@ -146,9 +147,9 @@ def run_simulation(optimizer, objective_func, num_trials, max_iterations, tolera
             best_fitness_overall = result['best_fitness']
             best_position_overall = result['best_position'].copy()
         
-        print(f"Trial {trial + 1} completed:")
-        print(f"Best Fitness: {result['best_fitness']:.10f}")
-        print(f"Iterations: {result['iterations']}")
+        # Print trial result in the requested format
+        position_str = "\t".join([f"{pos:.10f}" for pos in result['best_position']])
+        print(f"PSO\t{function_name}\t{result['best_fitness']:.10f}\t{dimension}\t{position_str}")
     
     # Calculate statistics
     fitness_values = [r['best_fitness'] for r in all_results]
@@ -166,6 +167,21 @@ def run_simulation(optimizer, objective_func, num_trials, max_iterations, tolera
         'total_time': time.time() - total_start_time,
         'num_trials': num_trials
     }
+    
+    # Print summary statistics
+    print("\n" + "="*80)
+    print("Statistical Summary:")
+    print("="*80)
+    print(f"Number of Trials: {statistics['num_trials']}")
+    print(f"Best Fitness Overall: {statistics['best_fitness_overall']:.10f}")
+    print(f"Mean Fitness: {statistics['mean_fitness']:.10f}")
+    print(f"Std. Dev. Fitness: {statistics['std_fitness']:.10f}")
+    print(f"Min Fitness: {statistics['min_fitness']:.10f}")
+    print(f"Max Fitness: {statistics['max_fitness']:.10f}")
+    print(f"Mean Iterations: {statistics['mean_iterations']:.2f}")
+    print(f"Std. Dev. Iterations: {statistics['std_iterations']:.2f}")
+    print(f"Total Execution Time: {statistics['total_time']:.2f} seconds")
+    print("="*80)
     
     return statistics
 
@@ -284,7 +300,7 @@ if __name__ == '__main__':
     else:
         if args.function not in bounds:
             raise ValueError(f"Function '{args.function}' is not implemented or bounds are not defined.")
-    lower_bound, upper_bound = bounds[args.function]
+        lower_bound, upper_bound = bounds[args.function]
     
     # Initialize optimizer
     optimizer = PSOOptimizer(
@@ -305,23 +321,12 @@ if __name__ == '__main__':
         statistics = run_simulation(
             optimizer=optimizer,
             objective_func=objective_func,
+            function_name=args.function.replace('_', ' ').title(),
             num_trials=args.trials,
             max_iterations=args.max_iterations,
-            tolerance=args.tolerance
+            tolerance=args.tolerance,
+            dimension=args.dimension
         )
-        
-        # Print statistical results
-        print("\nStatistical Results:")
-        print(f"Number of Trials: {statistics['num_trials']}")
-        print(f"Best Fitness Overall: {statistics['best_fitness_overall']:.10f}")
-        print(f"Best Position Overall: {statistics['best_position_overall']}")
-        print(f"Mean Fitness: {statistics['mean_fitness']:.10f}")
-        print(f"Std. Dev. Fitness: {statistics['std_fitness']:.10f}")
-        print(f"Min Fitness: {statistics['min_fitness']:.10f}")
-        print(f"Max Fitness: {statistics['max_fitness']:.10f}")
-        print(f"Mean Iterations: {statistics['mean_iterations']:.2f}")
-        print(f"Std. Dev. Iterations: {statistics['std_iterations']:.2f}")
-        print(f"Total Execution Time: {statistics['total_time']:.2f} seconds")
     else:
         # Run single optimization
         start_time = time.time()
@@ -333,11 +338,14 @@ if __name__ == '__main__':
         )
         end_time = time.time()
         
-        # Print results
-        print("\nOptimization Results:")
-        print(f"Function: {args.function}")
-        print(f"Best Position: {result['best_position']}")
-        print(f"Best Fitness: {result['best_fitness']:.10f}")
+        # Print results in the requested format
+        print("\n" + "="*80)
+        print("Optimization Results:")
+        print("="*80)
+        position_str = "\t".join([f"{pos:.10f}" for pos in result['best_position']])
+        print(f"PSO\t{args.function.replace('_', ' ').title()}\t{result['best_fitness']:.10f}\t{args.dimension}\t{position_str}")
+        print("\nAdditional Information:")
         print(f"Iterations: {result['iterations']}")
         print(f"Execution Time: {end_time - start_time:.6f} seconds")
         print(f"Final Swarm Diversity: {result['diversity_history'][-1]:.6f}")
+        print("="*80)
