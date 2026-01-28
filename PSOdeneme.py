@@ -26,7 +26,6 @@ class PSOOptimizer:
     def _initialize_particles(self):
         particles = np.zeros((self.particle_count, self.dimension))
         for d in range(self.dimension):
-            # Sınırları esnek al (Tek sayı veya Liste olabilir)
             lb = self.lower_bound[d] if isinstance(self.lower_bound, (list, np.ndarray)) else self.lower_bound
             ub = self.upper_bound[d] if isinstance(self.upper_bound, (list, np.ndarray)) else self.upper_bound
             particles[:, d] = np.random.uniform(lb, ub, self.particle_count)
@@ -87,27 +86,45 @@ class PSOOptimizer:
             
         return {'best_position': self.gbest_position, 'best_fitness': self.gbest_score}
 
+# --- HATA DÜZELTİLDİ: ARTIK HER DURUMDA İKİ DEĞER DÖNDÜRÜYOR ---
 def get_theoretical_values(func_name, dim):
-    # Basit bir eşleştirme (Detaylandırılabilir)
+    theo_pos = None 
     val = 0.0
-    if func_name == 'eggholder': return -959.6407, [512, 404.2319]
-    elif func_name == 'styblinski_tang': return -39.166 * dim, [-2.9035]*dim
-    elif func_name == 'michalewicz': return -1.8013 if dim==2 else -4.687, [2.20, 1.57]
-    elif func_name == 'rosenbrock': return 0.0, [1.0]*dim
-    return 0.0, [val] * dim
+    
+    if func_name == 'eggholder':
+        val = -959.6407
+        theo_pos = [512, 404.2319]
+    elif func_name == 'styblinski_tang':
+        val = -39.166 * dim
+    elif func_name == 'michalewicz':
+        val = -1.8013 if dim == 2 else -4.687
+    elif func_name == 'rosenbrock':
+        val = 0.0
+        theo_pos = [1.0] * dim
+    elif func_name == 'shekel':
+        val = -10.5364
+        theo_pos = [4.0] * 4
+    elif func_name == 'easom':
+        val = -1.0
+        theo_pos = [3.1415, 3.1415]
+    elif func_name == 'powell':
+        val = 0.0
+        theo_pos = [0.0] * dim
+    
+    # KESİN ÇÖZÜM: Burası virgül ile iki değer döndürür (Tuple)
+    return val, theo_pos
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--function', type=str, required=True)
     parser.add_argument('--trials', type=int, default=30)
     parser.add_argument('--dim', type=int, default=2)
-    parser.add_argument('--particle-count', type=int, default=100)
-    parser.add_argument('--max-iterations', type=int, default=3000)
-    
+    parser.add_argument('--particle-count', type=int, default=100) # İsteğe bağlı default
+    parser.add_argument('--max-iterations', type=int, default=3000) # İsteğe bağlı default
     args = parser.parse_args()
     target_func = args.function.lower()
     
-    # --- GÜNCELLENMİŞ BOUNDS LİSTESİ ---
+    # --- Bounds ---
     bounds = {
         'ackley': (-32.768, 32.768), 
         'three_hump_camel': (-5, 5), 
@@ -122,7 +139,7 @@ if __name__ == '__main__':
         'hartmann_3d': (0, 1), 
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1), 
-        'perm': (-2, 2), # bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm': (-2, 2),
         'powell': (-4, 5),
         'shekel': (0, 10), 
         'styblinski_tang': (-5, 5), 
@@ -139,28 +156,29 @@ if __name__ == '__main__':
         'schaffer_n2': (-100, 100), 
         'schaffer_n4': (-100, 100),
         'schwefel': (-500, 500), 
-        'shubert': (-10, 10), #[-5.12, 5.12] arlığında da denenebilir
+        'shubert': (-10, 10),
         'michalewicz': (0, np.pi),
         'easom': (-100, 100), 
         'booth': (-10, 10), 
         'matyas': (-10, 10),
         'zakharov': (-5, 10), 
         'bohachevsky': (-100, 100), 
-        'perm_0': (-2, 2), #bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm_0': (-2, 2),
         'rotated_hyper_ellipsoid': (-65.536, 65.536), 
         'sphere': (-5.12, 5.12),
         'sum_of_different_powers': (-1, 1), 
         'mccormick': ([-1.5, -3], [4, 4]),
-        'trid': (-2, 2), #[-dkare, dkare] arlığında da denenebilir
-        'power_sum': (0, 2), #[0, d] arlığında da denenebilir
+        'trid': (-2, 2),
+        'power_sum': (0, 2),
         'dejong_n5': (-65.536, 65.536),
-        'sum_squares': (-10, 10), #[-5.12, 5.12] arlığında da denenebilir
+        'sum_squares': (-10, 10),
         'bukin_n6': ([-15, -3], [-5, 3])
     }
-
+    
+    # Powell buradan çıkarıldı, artık esnek boyutlu.
     fixed_dims = {
         'colville':4,'hartmann_3d':3,'hartmann_4d':4,'hartmann_6d':6,
-        'powell':4,'shekel':4,'eggholder':2,'goldstein_price':2,
+        'shekel':4,'eggholder':2,'goldstein_price':2,
         'six_hump_camel':2,'beale':2,'branin':2,'bukin_n6':2,
         'mccormick':2,'drop_wave':2,'three_hump_camel':2
     }
@@ -169,62 +187,69 @@ if __name__ == '__main__':
         'bohachevsky':'bohacevsky_function',
         'perm_0':'perm_0_d_beta_function',
         'bukin':'bukin_n6_function',
-        'bukin_n6':'bukin_n6_function',
+        'bukin_n6':'bukin_n6_function', 
         'dejong_n5': 'dejong_n5_function'
     }
 
     if target_func not in bounds: 
         sys.exit(f"Error: {target_func} not found in bounds dictionary.")
     
-    current_dim = fixed_dims.get(target_func, args.dim)
-    bound_data = bounds[target_func]
-
-    # BOUNDS İŞLEME MANTIĞI (LİSTE veya TEK SAYI)
-    if isinstance(bound_data[0], (list, tuple)):
-        # Eğer ([-15, -3], [-5, 3]) gibi geldiyse
-        lb = np.array(bound_data[0])
-        ub = np.array(bound_data[1])
+    # --- BOYUT BELİRLEME MANTIĞI ---
+    if target_func in fixed_dims:
+        current_dim = fixed_dims[target_func]
+        dim_info = "(SABİT)"
     else:
-        # Eğer (-5, 5) gibi geldiyse
-        lb = np.full(current_dim, bound_data[0])
-        ub = np.full(current_dim, bound_data[1])
+        current_dim = args.dim
+        dim_info = "(ESNEK)"
+
+    bound_data = bounds[target_func]
+    if isinstance(bound_data[0], (list, tuple, np.ndarray)):
+        lb, ub = np.array(bound_data[0]), np.array(bound_data[1])
+    else:
+        lb, ub = np.full(current_dim, bound_data[0]), np.full(current_dim, bound_data[1])
 
     opt_funcs = OptimizationFunctions()
     m_name = function_map.get(target_func, f"{target_func}_function")
     if not hasattr(opt_funcs, m_name): m_name = target_func
+    obj_func = getattr(opt_funcs, m_name)
     
-    try:
-        obj_func = getattr(opt_funcs, m_name)
-    except AttributeError:
-        sys.exit(f"Error: Function '{m_name}' not found in OptimizationFunctions class.")
-
+    # ARTIK BURASI HATA VERMEYECEK
     theo_fit, theo_pos = get_theoretical_values(target_func, current_dim)
 
-    print("\n"+"="*85)
-    print(f"ALGORİTMA: PSO | FONKSİYON: {target_func.upper()} | DIM: {current_dim}")
+    # --- TABLO BAŞLIĞI (6 SÜTUN) ---
+    print("\n"+"="*145)
+    print(f"ALGORİTMA: PSO | FONKSİYON: {target_func.upper()} | DIM: {current_dim} {dim_info}")
     print(f"PARÇACIK: {args.particle_count} | İTERASYON: {args.max_iterations}")
     print(f"HEDEF: {theo_fit}")
-    print("=" * 85)
-    print(f"{'No':<4} {'Best Fitness':<20} {'Time(s)':<10} {'Parametre 1':<15} {'Parametre 2':<15} {'Parametre 3':<15} {'Parametre 4':<15}")
-    print("-" * 85)
+    print("="*145)
+    print(f"{'No':<4} {'Best Fitness':<18} {'Time(s)':<10} {'Param 1':<15} {'Param 2':<15} {'Param 3':<15} {'Param 4':<15} {'Param 5':<15} {'Param 6':<15}")
+    print("-" * 145)
 
     fits, times = [], []
-    for i in range(1, args.trials+1):
+
+    for i in range(1, args.trials + 1):
         opt = PSOOptimizer(lb, ub, args.particle_count, current_dim)
         st = time.time()
         res = opt.optimize(obj_func, args.max_iterations)
         et = time.time()
-        
+
         run_time = et - st
         fit, pos = res['best_fitness'], res['best_position']
-        fits.append(fit); times.append(run_time)
-        
-        p1 = pos[0] if current_dim>=1 else 0
-        p2 = pos[1] if current_dim>=2 else 0
-        print(f"{i:<4} {fit:<20.8f} {run_time:<10.4f} {p1:<15.4f} {p2:<15.4f}")
 
-    print("="*85)
+        fits.append(fit)
+        times.append(run_time)
+
+        params = []
+        for j in range(6):
+            if j < len(pos):
+                params.append(f"{pos[j]:<15.4f}")
+            else:
+                params.append(f"{'-':<15}")
+
+        print(f"{i:<4} {fit:<18.8f} {run_time:<10.4f} {params[0]}{params[1]}{params[2]}{params[3]}{params[4]}{params[5]}")
+
+    print("="*145)
     print(f"ORTALAMA FITNESS: {np.mean(fits):.10f}")
     print(f"EN İYİ FITNESS  : {np.min(fits):.10f}")
     print(f"ORTALAMA SÜRE   : {np.mean(times):.4f} sn")
-    print("="*85)
+    print("="*145)

@@ -21,7 +21,6 @@ class ABCOptimizer:
         self.best_solution = None
         self.best_fitness = np.inf
 
-    # ---------------- INITIALIZATION ----------------
     def _initialize_food_sources(self):
         food = np.zeros((self.employed_bees, self.dimension))
         for d in range(self.dimension):
@@ -30,7 +29,7 @@ class ABCOptimizer:
             food[:, d] = np.random.uniform(lb, ub, self.employed_bees)
         return food
 
-    # ---------------- FITNESS ----------------
+
     @staticmethod
     def _fitness_transform(value):
         return 1 / (1 + value) if value >= 0 else 1 + abs(value)
@@ -40,7 +39,6 @@ class ABCOptimizer:
         total = np.sum(transformed)
         return transformed / total if total != 0 else np.full(len(transformed), 1 / len(transformed))
 
-    # ---------------- NEIGHBOR ----------------
     def _generate_neighbor(self, idx):
         partner_idx = np.random.choice([i for i in range(self.employed_bees) if i != idx])
         phi = np.random.uniform(-1, 1, self.dimension)
@@ -57,7 +55,7 @@ class ABCOptimizer:
 
         return neighbor
 
-    # ---------------- SCOUT ----------------
+
     def _scout_phase(self):
         abandoned = np.where(self.trial_counts >= self.limit)[0]
         for idx in abandoned:
@@ -69,9 +67,9 @@ class ABCOptimizer:
             self.trial_counts[idx] = 0
             self.fitness_scores[idx] = np.inf
 
-    # ---------------- OPTIMIZATION ----------------
+
     def optimize(self, objective_func, max_cycles=3000, tolerance=1e-6):
-        # Initial evaluation
+
         for i in range(self.employed_bees):
             try:
                 fit = objective_func(self.food_sources[i])
@@ -83,10 +81,10 @@ class ABCOptimizer:
                 self.best_fitness = fit
                 self.best_solution = self.food_sources[i].copy()
 
-        # Main loop
+
         for _ in range(max_cycles):
 
-            # Employed Bees
+
             for i in range(self.employed_bees):
                 candidate = self._generate_neighbor(i)
                 fit = objective_func(candidate)
@@ -98,7 +96,7 @@ class ABCOptimizer:
                 else:
                     self.trial_counts[i] += 1
 
-            # Onlooker Bees
+
             probs = self._calculate_probabilities()
             count = 0
             i = 0
@@ -116,7 +114,7 @@ class ABCOptimizer:
                     count += 1
                 i = (i + 1) % self.employed_bees
 
-            # Scout + Global Best
+
             self._scout_phase()
             idx = np.argmin(self.fitness_scores)
             if self.fitness_scores[idx] < self.best_fitness:
@@ -142,13 +140,11 @@ if __name__ == '__main__':
     parser.add_argument('--function', type=str, required=True)
     parser.add_argument('--trials', type=int, default=30)
     parser.add_argument('--dim', type=int, default=2)
-    parser.add_argument('--colony-size', type=int, default=100)
-    parser.add_argument('--max-cycles', type=int, default=3000)
-    
+    parser.add_argument('--colony-size', type=int, default=50)
+    parser.add_argument('--max-cycles', type=int, default=1000)
     args = parser.parse_args()
     target_func = args.function.lower()
     
-    # --- GÜNCELLENMİŞ BOUNDS LİSTESİ ---
     bounds = {
         'ackley': (-32.768, 32.768), 
         'three_hump_camel': (-5, 5), 
@@ -198,33 +194,25 @@ if __name__ == '__main__':
         'sum_squares': (-10, 10), #[-5.12, 5.12] arlığında da denenebilir
         'bukin_n6': ([-15, -3], [-5, 3])
     }
-
-    fixed_dims = {
-        'colville':4,'hartmann_3d':3,'hartmann_4d':4,'hartmann_6d':6,
-        'powell':4,'shekel':4,'eggholder':2,'goldstein_price':2,
-        'six_hump_camel':2,'beale':2,'branin':2,'bukin_n6':2,
-        'mccormick':2,'drop_wave':2,'three_hump_camel':2
-    }
     
-    function_map = {
-        'bohachevsky':'bohacevsky_function',
-        'perm_0':'perm_0_d_beta_function',
-        'bukin':'bukin_n6_function',
-        'bukin_n6':'bukin_n6_function',
-        'dejong_n5': 'dejong_n5_function'
-    }
+    fixed_dims = {'colville':4,'hartmann_3d':3,'hartmann_4d':4,'hartmann_6d':6,'powell':4,'shekel':4,'eggholder':2,'goldstein_price':2,'six_hump_camel':2,'beale':2,'branin':2,'bukin_n6':2, 'mccormick':2}
+    function_map = {'bohachevsky':'bohacevsky_function','perm_0':'perm_0_d_beta_function','bukin':'bukin_n6_function','bukin_n6':'bukin_n6_function', 'dejong_n5': 'dejong_n5_function'}
 
-    if target_func not in bounds: sys.exit(f"Error: {target_func} not found.")
-    current_dim = fixed_dims.get(target_func, args.dim)
-    bound_data = bounds[target_func]
 
-    # BOUNDS İŞLEME MANTIĞI
-    if isinstance(bound_data[0], (list, tuple)):
-        lb = np.array(bound_data[0])
-        ub = np.array(bound_data[1])
+    if target_func not in bounds: sys.exit(f"Error: {target_func} not found in bounds.")
+    
+    if target_func in fixed_dims:
+        current_dim = fixed_dims[target_func]
+        dim_info = "(SABİT)"
     else:
-        lb = np.full(current_dim, bound_data[0])
-        ub = np.full(current_dim, bound_data[1])
+        current_dim = args.dim
+        dim_info = "(ESNEK)"
+
+    bound_data = bounds[target_func]
+    if isinstance(bound_data[0], (list, tuple, np.ndarray)):
+        lb, ub = np.array(bound_data[0]), np.array(bound_data[1])
+    else:
+        lb, ub = np.full(current_dim, bound_data[0]), np.full(current_dim, bound_data[1])
 
     opt_funcs = OptimizationFunctions()
     m_name = function_map.get(target_func, f"{target_func}_function")
@@ -232,13 +220,13 @@ if __name__ == '__main__':
     obj_func = getattr(opt_funcs, m_name)
     theo_fit, theo_pos = get_theoretical_values(target_func, current_dim)
 
-    print("\n"+"="*85)
-    print(f"ALGORİTMA: ABC | FONKSİYON: {target_func.upper()} | DIM: {current_dim}")
+    print("\n"+"="*145)
+    print(f"ALGORİTMA: ABC | FONKSİYON: {target_func.upper()} | DIM: {current_dim} {dim_info}")
     print(f"KOLONİ: {args.colony_size} | DÖNGÜ: {args.max_cycles}")
     print(f"HEDEF: {theo_fit}")
-    print("=" * 85)
-    print(f"{'No':<4} {'Best Fitness':<20} {'Time(s)':<10} {'Param 1':<15} {'Param 2':<15}")
-    print("-" * 85)
+    print("=" * 145)
+    print(f"{'No':<4} {'Best Fitness':<18} {'Time(s)':<10} {'Parametre 1':<15} {'Parametre 2':<15} {'Parametre 3':<15} {'Parametre 4':<15} {'Parametre 5':<15} {'Parametre 6':<15}")
+    print("-" * 145)
 
     fits, times = [], []
     for i in range(1, args.trials+1):
@@ -251,12 +239,15 @@ if __name__ == '__main__':
         fit, pos = res['best_fitness'], res['best_position']
         fits.append(fit); times.append(run_time)
         
-        p1 = pos[0] if current_dim>=1 else 0
-        p2 = pos[1] if current_dim>=2 else 0
-        print(f"{i:<4} {fit:<20.8f} {run_time:<10.4f} {p1:<15.4f} {p2:<15.4f}")
+        params = []
+        for j in range(6):
+            if j < len(pos): params.append(f"{pos[j]:<15.4f}")
+            else: params.append(f"{'-':<15}")
+            
+        print(f"{i:<4} {fit:<18.8f} {run_time:<10.4f} {params[0]}{params[1]}{params[2]}{params[3]}{params[4]}{params[5]}")
 
-    print("="*85)
+    print("="*145)
     print(f"ORTALAMA FITNESS: {np.mean(fits):.10f}")
     print(f"EN İYİ FITNESS  : {np.min(fits):.10f}")
     print(f"ORTALAMA SÜRE   : {np.mean(times):.4f} sn")
-    print("="*85)
+    print("="*145)
