@@ -481,16 +481,44 @@ class OptimizationFunctions:
     def power_sum_function(self, x):
         """Power Sum Function"""
         d = len(x)
-        return np.sum([(i+1) * (x[i]**(i+1)) for i in range(d)])
+        
+        # Boyuta göre b vektörünü belirle
+        if d == 4:
+            b = [8, 18, 44, 114] # SFU Standardı (Çözüm: 1, 2, 2, 3)
+        elif d == 2:
+            b = [3, 5]           # Çözüm: 1, 2
+        elif d == 3:
+            b = [6, 14, 36]      # Çözüm: 1, 2, 3
+        else:
+            # Genel durum: x* = (1, 2, ..., d) varsayarak b hesapla
+            b = [sum((i+1)**k for i in range(d)) for k in range(1, d+1)]
+
+        outer_sum = 0
+        for k in range(1, d + 1):
+            inner_sum = sum(x[i]**k for i in range(d))
+            outer_sum += (inner_sum - b[k-1])**2
+            
+        return outer_sum
 
     def pathological_function(self, x):
         """Pathological Function"""
         d = len(x)
         return np.sum([0.5 + (np.sin(np.sqrt(100 * x[i]**2 + x[i+1]**2))**2 - 0.5) / (1 + 0.001 * (x[i]**2 - 2*x[i]*x[i+1] + x[i+1]**2)**2) for i in range(d-1)])
     def perm_0_d_beta_function(self, x, beta=0.5):
-        """Perm 0, d, beta Function"""
+        """Perm 0, d, beta Function (Resimdeki Versiyon - Optimum: 1, 1/2, 1/3...)"""
         d = len(x)
-        return np.sum([np.sum([(j+1)**k + beta * ((x[j]/(j+1))**k - 1)**2 for j in range(d)]) for k in range(d)])
+        total_sum = 0
+        for k in range(1, d + 1): 
+            inner_sum = 0
+            for j in range(1, d + 1):
+
+                term1 = (j ** k + beta)
+                term2 = ((x[j-1] * j) ** k - 1) 
+                inner_sum += term1 * term2
+            
+            total_sum += inner_sum ** 2
+            
+        return total_sum
 
     def perm_d_beta_function(self, x, beta=0.5):
         """Perm d, beta Function"""
@@ -526,10 +554,10 @@ class OptimizationFunctions:
         x1, x2 = x[0], x[1]
         return 0.5 + (np.sin(np.sqrt(x1**2 + x2**2))**2 - 0.5) / (1 + 0.001 * (x1**2 + x2**2))**2
     def cde_jong_function(self, x):
-        """De Jong Function"""
+        """dejong_n5 Function"""
         return np.sum(x**2)
     def de_jong_function(self, x):
-        """De Jong Function"""
+        """dejong_n5 Function"""
         return np.sum(x**2)
 
     def trid_function(self, x):
@@ -545,16 +573,21 @@ class OptimizationFunctions:
         x1, x2 = x[0], x[1]
         return x1**2 + 2*x2**2 - 0.3*np.cos(3*np.pi*x1) - 0.4*np.cos(4*np.pi*x2) + 0.7
 
-    def de_jong_n5_function(self, x):
-        """De Jong N.5 Function"""
-        A = np.array([
-            [-32, -16, 0, 16, 32],
-            [-32, -16, 0, 16, 32],
-            [-32, -16, 0, 16, 32],
-            [-32, -16, 0, 16, 32],
-            [-32, -16, 0, 16, 32]
-        ])
-        return 0.002 + np.sum(1 / (np.arange(1, 26) + np.sum((x - A)**6, axis=1)))
-    def sum_of_different_powers_function(self, x):
-        """Sum of Different Powers Function"""
-        return np.sum(np.abs(x)**(np.arange(1, len(x) + 1)))
+    def dejong_n5_function(self, x):
+        """
+        De Jong Function N. 5 (Shekel's Foxholes)
+        Dimensions: 2
+        """
+        # a matrisi: 2x25 boyutunda
+        a = [
+            [-32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32, -32, -16, 0, 16, 32], 
+            [-32, -32, -32, -32, -32, -16, -16, -16, -16, -16, 0, 0, 0, 0, 0, 16, 16, 16, 16, 16, 32, 32, 32, 32, 32] 
+        ]
+        
+        sum_term = 0.002
+        for i in range(25): 
+            term1 = (x[0] - a[0][i]) ** 6
+            term2 = (x[1] - a[1][i]) ** 6
+            sum_term += 1.0 / (i + 1 + term1 + term2)
+            
+        return 1.0 / sum_term

@@ -86,41 +86,76 @@ class PSOOptimizer:
             
         return {'best_position': self.gbest_position, 'best_fitness': self.gbest_score}
 
-# --- HATA DÜZELTİLDİ: ARTIK HER DURUMDA İKİ DEĞER DÖNDÜRÜYOR ---
 def get_theoretical_values(func_name, dim):
     theo_pos = None 
     val = 0.0
     
-    if func_name == 'eggholder':
+    # --- POWER SUM ---
+    if func_name == 'power_sum':
+        val = 0.0
+        if dim == 4:
+            theo_pos = [1.0, 2.0, 2.0, 3.0] # SFU Standardı
+        elif dim == 2:
+            theo_pos = [1.0, 2.0]
+        elif dim == 3:
+            theo_pos = [1.0, 2.0, 3.0]
+        else:
+            theo_pos = [i+1 for i in range(dim)] 
+    
+    # --- EGGHOLDER ---
+    elif func_name == 'eggholder':
         val = -959.6407
-        theo_pos = [512, 404.2319]
+        theo_pos = [512.0, 404.2319] 
+        
+    # --- STYBLINSKI-TANG ---
     elif func_name == 'styblinski_tang':
-        val = -39.166 * dim
+        val = -39.16617 * dim
+        theo_pos = [-2.903534] * dim
+        
+    # --- MICHALEWICZ ---
     elif func_name == 'michalewicz':
-        val = -1.8013 if dim == 2 else -4.687
+        if dim == 2:
+            val = -1.8013
+            theo_pos = [2.2029, 1.5708]
+        elif dim == 5:
+            val = -4.6877
+            theo_pos = [2.2029, 1.5708, 1.2850, 1.9231, 1.7205]
+        else:
+             val = -0.966 * dim # Yaklaşık değer
+             theo_pos = [0.0] * dim # Tam bilinmeyen boyutlar için varsayılan
+             
+    # --- ROSENBROCK ---
     elif func_name == 'rosenbrock':
         val = 0.0
         theo_pos = [1.0] * dim
+        
+    # --- SHEKEL ---
     elif func_name == 'shekel':
         val = -10.5364
         theo_pos = [4.0] * 4
+        
+    # --- EASOM ---
     elif func_name == 'easom':
         val = -1.0
-        theo_pos = [3.1415, 3.1415]
+        theo_pos = [3.14159, 3.14159]
+        
+    # --- POWELL ---
     elif func_name == 'powell':
         val = 0.0
         theo_pos = [0.0] * dim
-    
-    # KESİN ÇÖZÜM: Burası virgül ile iki değer döndürür (Tuple)
-    return val, theo_pos
 
+    # --- DİĞER EKSİK OLABİLECEKLER İÇİN ---
+    # Buraya eklemeye devam edebilirsiniz...
+
+    return val, theo_pos
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--function', type=str, required=True)
     parser.add_argument('--trials', type=int, default=30)
     parser.add_argument('--dim', type=int, default=2)
-    parser.add_argument('--particle-count', type=int, default=100) # İsteğe bağlı default
-    parser.add_argument('--max-iterations', type=int, default=3000) # İsteğe bağlı default
+    # UPDATED DEFAULTS: Population=100, Iterations=500
+    parser.add_argument('--particle-count', type=int, default=100) 
+    parser.add_argument('--max-iterations', type=int, default=500) 
     args = parser.parse_args()
     target_func = args.function.lower()
     
@@ -139,7 +174,7 @@ if __name__ == '__main__':
         'hartmann_3d': (0, 1), 
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1), 
-        'perm': (-2, 2),
+        'perm': (-4, 4), # bu kısmın dimeition'a göre ayarlanması gerekli!
         'powell': (-4, 5),
         'shekel': (0, 10), 
         'styblinski_tang': (-5, 5), 
@@ -156,26 +191,25 @@ if __name__ == '__main__':
         'schaffer_n2': (-100, 100), 
         'schaffer_n4': (-100, 100),
         'schwefel': (-500, 500), 
-        'shubert': (-10, 10),
+        'shubert': (-10, 10), #[-5.12, 5.12] arlığında da denenebilir
         'michalewicz': (0, np.pi),
         'easom': (-100, 100), 
         'booth': (-10, 10), 
         'matyas': (-10, 10),
         'zakharov': (-5, 10), 
         'bohachevsky': (-100, 100), 
-        'perm_0': (-2, 2),
+        'perm_0': (-2, 2), #bu kısmın dimeition'a göre ayarlanması gerekli!
         'rotated_hyper_ellipsoid': (-65.536, 65.536), 
         'sphere': (-5.12, 5.12),
         'sum_of_different_powers': (-1, 1), 
         'mccormick': ([-1.5, -3], [4, 4]),
-        'trid': (-2, 2),
-        'power_sum': (0, 2),
+        'trid': (-4, 4), #[-dkare, dkare] arlığında da denenebilir
+        'power_sum': (0, 2), #[0, d] arlığında da denenebilir
         'dejong_n5': (-65.536, 65.536),
-        'sum_squares': (-10, 10),
+        'sum_squares': (-10, 10), #[-5.12, 5.12] arlığında da denenebilir
         'bukin_n6': ([-15, -3], [-5, 3])
     }
     
-    # Powell buradan çıkarıldı, artık esnek boyutlu.
     fixed_dims = {
         'colville':4,'hartmann_3d':3,'hartmann_4d':4,'hartmann_6d':6,
         'shekel':4,'eggholder':2,'goldstein_price':2,
@@ -194,7 +228,6 @@ if __name__ == '__main__':
     if target_func not in bounds: 
         sys.exit(f"Error: {target_func} not found in bounds dictionary.")
     
-    # --- BOYUT BELİRLEME MANTIĞI ---
     if target_func in fixed_dims:
         current_dim = fixed_dims[target_func]
         dim_info = "(SABİT)"
@@ -213,16 +246,14 @@ if __name__ == '__main__':
     if not hasattr(opt_funcs, m_name): m_name = target_func
     obj_func = getattr(opt_funcs, m_name)
     
-    # ARTIK BURASI HATA VERMEYECEK
     theo_fit, theo_pos = get_theoretical_values(target_func, current_dim)
 
-    # --- TABLO BAŞLIĞI (6 SÜTUN) ---
     print("\n"+"="*145)
     print(f"ALGORİTMA: PSO | FONKSİYON: {target_func.upper()} | DIM: {current_dim} {dim_info}")
     print(f"PARÇACIK: {args.particle_count} | İTERASYON: {args.max_iterations}")
     print(f"HEDEF: {theo_fit}")
     print("="*145)
-    print(f"{'No':<4} {'Best Fitness':<18} {'Time(s)':<10} {'Param 1':<15} {'Param 2':<15} {'Param 3':<15} {'Param 4':<15} {'Param 5':<15} {'Param 6':<15}")
+    print(f"{'No':<4} {'Best Fitness':<18} {'Time(s)':<10} {'Parametre 1':<15} {'Parametre 2':<15} {'Parametre 3':<15} {'Parametre 4':<15} {'Parametre 5':<15} {'Parametre 6':<15}")
     print("-" * 145)
 
     fits, times = [], []
