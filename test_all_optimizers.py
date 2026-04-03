@@ -2,16 +2,12 @@ import numpy as np
 import pytest
 from itertools import product
 
-from PSOdeneme import PSOOptimizer
-from DEdeneme import DEOptimizer
-from ABCdeneme import ABCOptimizer
-from GENdeneme import GENOptimizer
+from PSO_Optimizer import PSOOptimizer
+from DE_Optimizer import DEOptimizer
+from ABC_Optimizer import ABCOptimizer
+from GEN_Optimizer import GENOptimizer
 from Optimization_Functions import OptimizationFunctions
 
-
-# -----------------------------
-# CONFIGURATION
-# -----------------------------
 
 EASY_FUNCTIONS = ['sphere', 'sum_squares', 'booth', 'matyas']
 MEDIUM_FUNCTIONS = ['ackley', 'griewank', 'rastrigin']
@@ -42,7 +38,7 @@ FIXED_DIMS = {
     'matyas': 2,
 }
 
-# Regression thresholds (NOT optimal values)
+
 REGRESSION_THRESHOLDS = {
     'sphere': 1.0,
     'sum_squares': 1.0,
@@ -53,10 +49,6 @@ REGRESSION_THRESHOLDS = {
     'rastrigin': 100.0,
 }
 
-
-# -----------------------------
-# HELPERS
-# -----------------------------
 
 def get_function_config(func_name, dim=2):
     if func_name not in BOUNDS:
@@ -87,10 +79,6 @@ def run_optimizer(optimizer_name, optimizer, obj_func, steps):
         return optimizer.optimize(obj_func, max_cycles=steps)
 
 
-# -----------------------------
-# TEST 1: INITIALIZATION
-# -----------------------------
-
 @pytest.mark.parametrize("optimizer_name", OPTIMIZERS.keys())
 def test_optimizer_initialization(optimizer_name):
     lb = np.array([-10, -10])
@@ -104,9 +92,6 @@ def test_optimizer_initialization(optimizer_name):
     assert optimizer.dimension == 2
 
 
-# -----------------------------
-# TEST 2: EASY & MEDIUM (STOCHASTIC REGRESSION)
-# -----------------------------
 
 @pytest.mark.parametrize(
     "optimizer_name,func_name",
@@ -139,9 +124,6 @@ def test_stochastic_regression_easy_medium(optimizer_name, func_name):
     )
 
 
-# -----------------------------
-# TEST 3: HARD FUNCTIONS (ROBUSTNESS ONLY)
-# -----------------------------
 
 @pytest.mark.parametrize(
     "optimizer_name,func_name",
@@ -164,10 +146,6 @@ def test_hard_functions_stability(optimizer_name, func_name):
 
     assert np.isfinite(fitness)
 
-
-# -----------------------------
-# TEST 4: DIMENSION REGRESSION
-# -----------------------------
 
 @pytest.mark.parametrize(
     "optimizer_name,dim",

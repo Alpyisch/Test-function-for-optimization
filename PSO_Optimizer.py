@@ -90,11 +90,11 @@ def get_theoretical_values(func_name, dim):
     theo_pos = None 
     val = 0.0
     
-    # --- POWER SUM ---
+    
     if func_name == 'power_sum':
         val = 0.0
         if dim == 4:
-            theo_pos = [1.0, 2.0, 2.0, 3.0] # SFU Standardı
+            theo_pos = [1.0, 2.0, 2.0, 3.0] 
         elif dim == 2:
             theo_pos = [1.0, 2.0]
         elif dim == 3:
@@ -102,17 +102,17 @@ def get_theoretical_values(func_name, dim):
         else:
             theo_pos = [i+1 for i in range(dim)] 
     
-    # --- EGGHOLDER ---
+    
     elif func_name == 'eggholder':
         val = -959.6407
         theo_pos = [512.0, 404.2319] 
         
-    # --- STYBLINSKI-TANG ---
+    
     elif func_name == 'styblinski_tang':
         val = -39.16617 * dim
         theo_pos = [-2.903534] * dim
         
-    # --- MICHALEWICZ ---
+    
     elif func_name == 'michalewicz':
         if dim == 2:
             val = -1.8013
@@ -121,31 +121,29 @@ def get_theoretical_values(func_name, dim):
             val = -4.6877
             theo_pos = [2.2029, 1.5708, 1.2850, 1.9231, 1.7205]
         else:
-             val = -0.966 * dim # Yaklaşık değer
-             theo_pos = [0.0] * dim # Tam bilinmeyen boyutlar için varsayılan
+             val = -0.966 * dim 
+             theo_pos = [0.0] * dim 
              
-    # --- ROSENBROCK ---
+
     elif func_name == 'rosenbrock':
         val = 0.0
         theo_pos = [1.0] * dim
         
-    # --- SHEKEL ---
+    
     elif func_name == 'shekel':
         val = -10.5364
         theo_pos = [4.0] * 4
         
-    # --- EASOM ---
+    
     elif func_name == 'easom':
         val = -1.0
         theo_pos = [3.14159, 3.14159]
         
-    # --- POWELL ---
+    
     elif func_name == 'powell':
         val = 0.0
         theo_pos = [0.0] * dim
 
-    # --- DİĞER EKSİK OLABİLECEKLER İÇİN ---
-    # Buraya eklemeye devam edebilirsiniz...
 
     return val, theo_pos
 if __name__ == '__main__':
@@ -174,7 +172,7 @@ if __name__ == '__main__':
         'hartmann_3d': (0, 1), 
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1), 
-        'perm': (-4, 4), # bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm': (-4, 4), 
         'powell': (-4, 5),
         'shekel': (0, 10), 
         'styblinski_tang': (-5, 5), 
@@ -198,7 +196,7 @@ if __name__ == '__main__':
         'matyas': (-10, 10),
         'zakharov': (-5, 10), 
         'bohachevsky': (-100, 100), 
-        'perm_0': (-2, 2), #bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm_0': (-2, 2), 
         'rotated_hyper_ellipsoid': (-65.536, 65.536), 
         'sphere': (-5.12, 5.12),
         'sum_of_different_powers': (-1, 1), 

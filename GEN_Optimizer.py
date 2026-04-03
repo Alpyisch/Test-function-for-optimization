@@ -4,122 +4,94 @@ import argparse
 import sys
 from Optimization_Functions import OptimizationFunctions
 
-class ABCOptimizer:
-    def __init__(self, lower_bound, upper_bound, colony_size, dimension, limit=50):
+class GENOptimizer:
+    def __init__(self, lower_bound, upper_bound, population_size, dimension,
+                 mutation_rate=0.05, crossover_rate=0.95):
+
         self.lower_bound = np.array(lower_bound) if isinstance(lower_bound, (list, np.ndarray)) else lower_bound
         self.upper_bound = np.array(upper_bound) if isinstance(upper_bound, (list, np.ndarray)) else upper_bound
-        self.colony_size = colony_size
+
+        self.population_size = population_size
         self.dimension = dimension
-        self.employed_bees = colony_size // 2
-        self.onlooker_bees = colony_size - self.employed_bees
-        self.limit = limit
+        self.mutation_rate = mutation_rate
+        self.crossover_rate = crossover_rate
 
-        self.food_sources = self._initialize_food_sources()
-        self.fitness_scores = np.full(self.employed_bees, np.inf)
-        self.trial_counts = np.zeros(self.employed_bees, dtype=int)
-
+        self.population = self._initialize_population()
         self.best_solution = None
         self.best_fitness = np.inf
 
-    def _initialize_food_sources(self):
-        food = np.zeros((self.employed_bees, self.dimension))
+
+    def _initialize_population(self):
+        pop = np.zeros((self.population_size, self.dimension))
         for d in range(self.dimension):
             lb = self.lower_bound[d] if isinstance(self.lower_bound, np.ndarray) else self.lower_bound
             ub = self.upper_bound[d] if isinstance(self.upper_bound, np.ndarray) else self.upper_bound
-            food[:, d] = np.random.uniform(lb, ub, self.employed_bees)
-        return food
+            pop[:, d] = np.random.uniform(lb, ub, self.population_size)
+        return pop
+
+    def _tournament_selection(self, fitness, k=2):
+        idxs = np.random.choice(self.population_size, k, replace=False)
+        best = idxs[np.argmin(fitness[idxs])]
+        return self.population[best]
 
 
-    @staticmethod
-    def _fitness_transform(value):
-        return 1 / (1 + value) if value >= 0 else 1 + abs(value)
+    def _crossover(self, parent1, parent2):
+        child = parent1.copy()
+        if np.random.rand() < self.crossover_rate:
+            point = np.random.randint(1, self.dimension)
+            child[point:] = parent2[point:]
+        return child
 
-    def _calculate_probabilities(self):
-        transformed = np.array([self._fitness_transform(v) for v in self.fitness_scores])
-        total = np.sum(transformed)
-        return transformed / total if total != 0 else np.full(len(transformed), 1 / len(transformed))
+    def _mutation(self, individual):
+        if np.random.rand() < self.mutation_rate:
+            if isinstance(self.upper_bound, np.ndarray):
+                sigma = 0.1 * (self.upper_bound - self.lower_bound)
+            else:
+                sigma = 0.1 * (self.upper_bound - self.lower_bound)
+            individual += np.random.normal(0, sigma, self.dimension)
+        return individual
 
-    def _generate_neighbor(self, idx):
-        partner_idx = np.random.choice([i for i in range(self.employed_bees) if i != idx])
-        phi = np.random.uniform(-1, 1, self.dimension)
-
-        current = self.food_sources[idx]
-        partner = self.food_sources[partner_idx]
-
-        neighbor = current + phi * (current - partner)
-
+    def _ensure_bounds(self, individual):
         for d in range(self.dimension):
             lb = self.lower_bound[d] if isinstance(self.lower_bound, np.ndarray) else self.lower_bound
             ub = self.upper_bound[d] if isinstance(self.upper_bound, np.ndarray) else self.upper_bound
-            neighbor[d] = np.clip(neighbor[d], lb, ub)
-
-        return neighbor
-
-
-    def _scout_phase(self):
-        abandoned = np.where(self.trial_counts >= self.limit)[0]
-        for idx in abandoned:
-            for d in range(self.dimension):
-                lb = self.lower_bound[d] if isinstance(self.lower_bound, np.ndarray) else self.lower_bound
-                ub = self.upper_bound[d] if isinstance(self.upper_bound, np.ndarray) else self.upper_bound
-                self.food_sources[idx, d] = np.random.uniform(lb, ub)
-
-            self.trial_counts[idx] = 0
-            self.fitness_scores[idx] = np.inf
+            individual[d] = np.clip(individual[d], lb, ub)
+        return individual
 
 
-    def optimize(self, objective_func, max_cycles=3000, tolerance=1e-6):
+    def optimize(self, objective_func, max_generations=3000, tolerance=1e-6):
+        try:
+            fitness = np.array([objective_func(ind) for ind in self.population])
+        except:
+            return None
 
-        for i in range(self.employed_bees):
-            try:
-                fit = objective_func(self.food_sources[i])
-            except:
-                fit = np.inf
+        best_idx = np.argmin(fitness)
+        self.best_fitness = fitness[best_idx]
+        self.best_solution = self.population[best_idx].copy()
 
-            self.fitness_scores[i] = fit
-            if fit < self.best_fitness:
-                self.best_fitness = fit
-                self.best_solution = self.food_sources[i].copy()
+        for _ in range(max_generations):
+            new_population = []
 
+            elite_idx = np.argsort(fitness)[:2]
+            new_population.extend(self.population[elite_idx])
 
-        for _ in range(max_cycles):
+            while len(new_population) < self.population_size:
+                p1 = self._tournament_selection(fitness)
+                p2 = self._tournament_selection(fitness)
 
+                child = self._crossover(p1, p2)
+                child = self._mutation(child)
+                child = self._ensure_bounds(child)
 
-            for i in range(self.employed_bees):
-                candidate = self._generate_neighbor(i)
-                fit = objective_func(candidate)
+                new_population.append(child)
 
-                if fit < self.fitness_scores[i]:
-                    self.food_sources[i] = candidate
-                    self.fitness_scores[i] = fit
-                    self.trial_counts[i] = 0
-                else:
-                    self.trial_counts[i] += 1
+            self.population = np.array(new_population)
+            fitness = np.array([objective_func(ind) for ind in self.population])
 
-
-            probs = self._calculate_probabilities()
-            count = 0
-            i = 0
-            while count < self.onlooker_bees:
-                if np.random.rand() < probs[i]:
-                    candidate = self._generate_neighbor(i)
-                    fit = objective_func(candidate)
-
-                    if fit < self.fitness_scores[i]:
-                        self.food_sources[i] = candidate
-                        self.fitness_scores[i] = fit
-                        self.trial_counts[i] = 0
-                    else:
-                        self.trial_counts[i] += 1
-                    count += 1
-                i = (i + 1) % self.employed_bees
-
-
-            self._scout_phase()
-            idx = np.argmin(self.fitness_scores)
-            if self.fitness_scores[idx] < self.best_fitness:
-                self.best_fitness = self.fitness_scores[idx]
-                self.best_solution = self.food_sources[idx].copy()
+            curr_best = np.argmin(fitness)
+            if fitness[curr_best] < self.best_fitness:
+                self.best_fitness = fitness[curr_best]
+                self.best_solution = self.population[curr_best].copy()
 
             if self.best_fitness <= tolerance:
                 break
@@ -132,7 +104,6 @@ class ABCOptimizer:
 def get_theoretical_values(func_name, dim):
     val = 0.0
     if func_name == 'eggholder': return -959.6407, [512, 404.2319]
-    elif func_name == 'styblinski_tang': return -39.166 * dim, [-2.9035]*dim
     return 0.0, [val] * dim
 
 if __name__ == '__main__':
@@ -140,8 +111,8 @@ if __name__ == '__main__':
     parser.add_argument('--function', type=str, required=True)
     parser.add_argument('--trials', type=int, default=30)
     parser.add_argument('--dim', type=int, default=2)
-    parser.add_argument('--colony-size', type=int, default=50)
-    parser.add_argument('--max-cycles', type=int, default=1000)
+    parser.add_argument('--population-size', type=int, default=50)
+    parser.add_argument('--max-generations', type=int, default=1000)
     args = parser.parse_args()
     target_func = args.function.lower()
     
@@ -159,7 +130,7 @@ if __name__ == '__main__':
         'hartmann_3d': (0, 1), 
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1), 
-        'perm': (-2, 2), # bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm': (-2, 2), 
         'powell': (-4, 5),
         'shekel': (0, 10), 
         'styblinski_tang': (-5, 5), 
@@ -183,7 +154,7 @@ if __name__ == '__main__':
         'matyas': (-10, 10),
         'zakharov': (-5, 10), 
         'bohachevsky': (-100, 100), 
-        'perm_0': (-2, 2), #bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm_0': (-2, 2), 
         'rotated_hyper_ellipsoid': (-65.536, 65.536), 
         'sphere': (-5.12, 5.12),
         'sum_of_different_powers': (-1, 1), 
@@ -221,8 +192,8 @@ if __name__ == '__main__':
     theo_fit, theo_pos = get_theoretical_values(target_func, current_dim)
 
     print("\n"+"="*145)
-    print(f"ALGORİTMA: ABC | FONKSİYON: {target_func.upper()} | DIM: {current_dim} {dim_info}")
-    print(f"KOLONİ: {args.colony_size} | DÖNGÜ: {args.max_cycles}")
+    print(f"ALGORİTMA: GEN | FONKSİYON: {target_func.upper()} | DIM: {current_dim} {dim_info}")
+    print(f"POPULASYON: {args.population_size} | GENERATION: {args.max_generations}")
     print(f"HEDEF: {theo_fit}")
     print("=" * 145)
     print(f"{'No':<4} {'Best Fitness':<18} {'Time(s)':<10} {'Parametre 1':<15} {'Parametre 2':<15} {'Parametre 3':<15} {'Parametre 4':<15} {'Parametre 5':<15} {'Parametre 6':<15}")
@@ -230,9 +201,9 @@ if __name__ == '__main__':
 
     fits, times = [], []
     for i in range(1, args.trials+1):
-        opt = ABCOptimizer(lb, ub, args.colony_size, current_dim)
+        opt = GENOptimizer(lb, ub, args.population_size, current_dim)
         st = time.time()
-        res = opt.optimize(obj_func, args.max_cycles)
+        res = opt.optimize(obj_func, args.max_generations)
         et = time.time()
         
         run_time = et - st

@@ -160,7 +160,7 @@ if __name__ == '__main__':
         'hartmann_3d': (0, 1), 
         'hartmann_4d': (0, 1),
         'hartmann_6d': (0, 1), 
-        'perm': (-2, 2), # bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm': (-2, 2),
         'powell': (-4, 5),
         'shekel': (0, 10), 
         'styblinski_tang': (-5, 5), 
@@ -184,7 +184,7 @@ if __name__ == '__main__':
         'matyas': (-10, 10),
         'zakharov': (-5, 10), 
         'bohachevsky': (-100, 100), 
-        'perm_0': (-2, 2), #bu kısmın dimeition'a göre ayarlanması gerekli!
+        'perm_0': (-2, 2), 
         'rotated_hyper_ellipsoid': (-65.536, 65.536), 
         'sphere': (-5.12, 5.12),
         'sum_of_different_powers': (-1, 1), 
